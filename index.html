@@ -1,0 +1,2781 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ thống Tra cứu Thông tin Du học Hàn Quốc - Đôn Nguyễn</title>
+  
+  <!-- Tailwind CSS for modern look -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter with tight letter-spacing defaults -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- React & ReactDOM (v18) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel compiler for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes staggerFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .animate-fadeIn {
+      animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-slideIn {
+      animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-stagger {
+      opacity: 0;
+      animation: staggerFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-slide-left {
+      animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    /* Sleek Custom Scrollbar for modern Google Maps feel */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+    
+    /* Keep current soft sky blue/pastel ocean color */
+    .leaflet-container {
+      background: #EAF5FF !important; 
+    }
+    
+    /* Hover effects for Map Regions */
+    path.leaflet-interactive {
+      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), fill 200ms ease-out, stroke 200ms ease-out !important;
+      transform-origin: center;
+    }
+    path.leaflet-interactive:hover {
+      transform: scale(1.003);
+      outline: none;
+    }
+    
+    /* Hover effects for Markers & Labels */
+    .custom-pulse-marker, .custom-province-marker {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    .pulse-container, .province-label-container {
+      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    
+    .pulse-container:hover, .province-label-container:hover {
+      transform: scale(1.15) !important;
+    }
+    
+    .pulse-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+    }
+    
+    .static-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981; 
+      border: 1.5px solid #ffffff;
+      border-radius: 50%;
+      z-index: 5;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Increased Contrast (10% higher visibility) for Text labels */
+    .pulse-label {
+      position: absolute;
+      top: -24px;
+      font-weight: 700;
+      font-size: 11px;
+      color: #1e293b; 
+      background-color: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      white-space: nowrap;
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+
+    .gwangju-container .pulse-label {
+      top: 12px !important;
+    }
+    
+    .pulse-container:hover .pulse-label {
+      color: #10b981;
+      transform: translateY(-1px);
+    }
+
+    .province-label-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .province-label-text {
+      font-weight: 600;
+      font-size: 11px;
+      color: #475569; 
+      background-color: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    
+    .province-label-text:hover {
+      color: #0f172a;
+    }
+
+    /* Ocean Labels formatting */
+    .custom-ocean-marker {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      pointer-events: none !important;
+    }
+    
+    .ocean-label {
+      font-style: italic;
+      font-weight: 600;
+      font-size: 12px;
+      color: #7da5c9; /* Harmonized pastel ocean color */
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+      text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
+    /* Selective highlight region */
+    .selected-region-path {
+      fill: url(#emerald-gradient) !important;
+      filter: drop-shadow(0px 2px 4px rgba(16, 185, 129, 0.18)) !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 overflow-hidden text-slate-800 text-sm">
+
+  <!-- React root mount point -->
+  <div id="root"></div>
+
+  <!-- SVG gradient definition for Leaflet selective highlight -->
+  <svg width="0" height="0" style="position: absolute;">
+    <defs>
+      <linearGradient id="emerald-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#A7F3D0" />
+        <stop offset="100%" stop-color="#6EE7B7" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo } = React;
+    
+    const Search = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    );
+
+    const Plus = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    );
+
+    const Minus = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    );
+
+    const Check = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    );
+
+    const RefreshCw = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+    );
+
+    const MapPin = ({ size = 22, className = "", color = "currentColor" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+    );
+
+    const AlertCircle = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+    );
+
+    const AlertTriangle = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    );
+
+    const Zap = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </svg>
+    );
+
+    const Sparkles = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.32 11.32l.707.707M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path>
+      </svg>
+    );
+
+    const Lightbulb = ({ size = 16, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1 .3 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+        <line x1="9" y1="18" x2="15" y2="18" />
+        <line x1="10" y1="22" x2="14" y2="22" />
+      </svg>
+    );
+
+    const Thermometer = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+      </svg>
+    );
+
+    const Users = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+    );
+
+    const Info = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+    );
+
+    const ChevronLeft = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    );
+
+    const ChevronRight = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    );
+
+    const ChevronDown = ({ size = 22, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    );
+
+    const ExpandIcon = ({ size = 18, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <polyline points="9 21 3 21 3 15"></polyline>
+        <line x1="21" y1="3" x2="14" y2="10"></line>
+        <line x1="3" y1="21" x2="10" y2="14"></line>
+      </svg>
+    );
+
+    const ShrinkIcon = ({ size = 18, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="4 14 10 14 10 20"></polyline>
+        <polyline points="20 10 14 10 14 4"></polyline>
+        <line x1="14" y1="10" x2="21" y2="3"></line>
+        <line x1="10" y1="14" x2="3" y2="21"></line>
+      </svg>
+    );
+
+    const Briefcase = ({ size = 18, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+      </svg>
+    );
+
+    const BookOpen = ({ size = 18, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+      </svg>
+    );
+
+    const School = ({ size = 18, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="m4 6 8-4 8 4v14H4z" />
+        <path d="M14 22V12H10v10" />
+        <path d="M9 6h6" />
+      </svg>
+    );
+
+    const UniversityCrest = ({ name, size = 32 }) => {
+      const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const colors = [
+        { bg: '#EFF6FF', stroke: '#1E40AF', fill: '#3B82F6' }, 
+        { bg: '#ECFDF5', stroke: '#065F46', fill: '#10B981' }, 
+        { bg: '#FFF7ED', stroke: '#9A3412', fill: '#F97316' }, 
+        { bg: '#FDF2F8', stroke: '#9D174D', fill: '#EC4899' }, 
+        { bg: '#F5F3FF', stroke: '#5B21B6', fill: '#8B5CF6' }  
+      ];
+      const scheme = colors[hash % colors.length];
+
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 shadow-sm rounded-full">
+          <rect width="24" height="24" rx="12" fill={scheme.bg} />
+          <path d="M12 5L6 7V13C6 16.5 12 19 12 19C12 19 18 16.5 18 13V7L12 5Z" stroke={scheme.stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={scheme.bg} />
+          <path d="M12 8V15M9.5 10.5H14.5" stroke={scheme.fill} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    };
+
+    const RankBadge = ({ rank }) => {
+      const cleanRank = rank ? String(rank).trim() : 'Top 1';
+      if (cleanRank === 'Top 1' || cleanRank === '1') {
+        return (
+          <span className="text-[11px] font-normal px-2 rounded-lg border border-emerald-100/30 bg-emerald-50/40 text-[#15803D] whitespace-nowrap h-5 inline-flex items-center justify-center shrink-0">
+            Top 1
+          </span>
+        );
+      } else if (cleanRank === 'Top 2' || cleanRank === '2') {
+        return (
+          <span className="text-[11px] font-normal px-2 rounded-lg border border-blue-100/30 bg-blue-50/40 text-[#1D4ED8] whitespace-nowrap h-5 inline-flex items-center justify-center shrink-0">
+            Top 2
+          </span>
+        );
+      } else if (cleanRank === 'Top 3' || cleanRank === '3') {
+        return (
+          <span className="text-[11px] font-normal px-2 rounded-lg border border-purple-100/30 bg-purple-50/40 text-[#7E22CE] whitespace-nowrap h-5 inline-flex items-center justify-center shrink-0">
+            Top 3
+          </span>
+        );
+      }
+      return (
+        <span className="text-[11px] font-normal px-2 rounded-lg border border-slate-100 bg-slate-50/40 text-slate-600 whitespace-nowrap h-5 inline-flex items-center justify-center shrink-0">
+          {rank}
+        </span>
+      );
+    };
+
+    const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyd6ftEh9yKG39Dq6xNWDsggDuU_TLpu0aubCrqpYKAt9VuqWCL8iUg7LQBekMsvIXy/exec";
+
+    const REGION_MAP = {
+      "서울특별시": "Seoul",
+      "부산광역시": "Busan",
+      "대구광역시": "Daegu",
+      "인천광역시": "Incheon",
+      "인chen광역시": "Incheon",
+      "광u광역시": "Gwangju",
+      "광주광역시": "Gwangju",
+      "대전광역시": "Daejeon",
+      "울산광역시": "Ulsan",
+      "세종특별자치시": "Sejong",
+      "경기도": "Gyeonggi",
+      "강원do": "Gangwon",
+      "강원특별자치 độ": "Gangwon",
+      "강원특별자치do": "Gangwon",
+      "강원특별자치 do": "Gangwon",
+      "강원 do": "Gangwon",
+      "강원도": "Gangwon",
+      "충청북도": "Chungbuk",
+      "충청남도": "Chungnam",
+      "전라북도": "Jeonbuk",
+      "전b do": "Jeonbuk",
+      "전b do": "Jeonbuk",
+      "전b do": "Jeonbuk",
+      "전북 do": "Jeonbuk",
+      "전b do": "Jeonbuk",
+      "Khuvuc": "Jeonbuk",
+      "전라남도": "Jeonnam",
+      "경상북도": "Gyeongbuk",
+      "경상남도": "Gyeongnam",
+      "제u\ud2b9\ubcc4\uc790\uce58do": "Jeju",
+      "제u\ud2b9\ubcc4\uc790\uce58\ub3c4": "Jeju",
+      "제u\ud2b9\ubcc4\uc790\uce58 do": "Jeju",
+      "제주XT do": "Jeju",
+      "제주특별자치 do": "Jeju",
+      "제주특별자치도": "Jeju"
+    };
+
+    const MAJOR_CITIES = [
+      { name: "Seoul", coords: [37.5665, 126.9780] },
+      { name: "Incheon", coords: [37.4563, 126.7052] },
+      { name: "Sejong", coords: [36.4801, 127.2890] },
+      { name: "Daejeon", coords: [36.3504, 127.3845] },
+      { name: "Daegu", coords: [35.8714, 128.6014] },
+      { name: "Gwangju", coords: [35.1595, 126.8526] },
+      { name: "Ulsan", coords: [35.5389, 129.3114] },
+      { name: "Busan", coords: [35.1796, 129.0756] },
+      { name: "Jeju", coords: [33.3800, 126.5500] }
+    ];
+
+    const OTHER_PROVINCES = [
+      { name: "Gyeonggi", coords: [37.3500, 127.3500] },
+      { name: "Gangwon", coords: [37.8228, 128.1555] },
+      { name: "Chungbuk", coords: [36.8837, 127.7495] },
+      { name: "Chungnam", coords: [36.5184, 126.8000] },
+      { name: "Gyeongbuk", coords: [36.4919, 128.8889] },
+      { name: "Gyeongnam", coords: [35.4606, 128.2132] },
+      { name: "Jeonbuk", coords: [35.7175, 127.1530] },
+      { name: "Jeonnam", coords: [34.8679, 126.9910] }
+    ];
+
+    const REGIONS_INFO_DB = {
+      "Seoul": {
+        title: "Thành phố Seoul",
+        subTitle: "Thủ đô văn hóa & giáo dục • Hàn Quốc",
+        image: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=600&q=80",
+        overview: "Seoul - trung tâm giáo dục hàng đầu Hàn Quốc, nổi bật with các trường SKY danh tiếng và môi trường học tập quốc tế năng động.",
+        climate: "Khí hậu ôn đới lục địa có bốn mùa phân minh vô cùng tươi đẹp. Mùa thu tràn ngập sắc phong lá đỏ dịu dàng ôn hòa, mùa xuân hoa anh đào rợp trời ấm áp, kiến tạo không gian lý tưởng nhất cho đời sống sinh viên học đường.",
+        population: "Quy mô khoảng 9.5 triệu người năng động. Cộng đồng sinh viên quốc tế đông đúc hàng đầu cả nước, tạo nên một môi trường đa văn hóa cởi mở, văn minh và hệ thống an ninh xã hội nghiêm ngặt, an tâm tối đa."
+      },
+      "Busan": {
+        title: "Thành phố Busan",
+        subTitle: "Thành phố cảng biển lớn nhất • Hàn Quốc",
+        image: "https://www.the-wanderlusters.com/wp-content/uploads/2018/09/Busan-South-Korea-Streets-Wanderlusters-950x633.jpg",
+        overview: "Busan là đầu tàu kinh tế phía Nam năng động nổi tiếng with phong cảnh bờ biển rực rỡ, trung tâm liên hoan phim quốc tế BIFF. Đây là khu vực học tập lý tưởng with chi phí sinh hoạt vừa phải và thế mạnh đào tạo về hàng hải, du lịch, logistics thương mại quốc tế.",
+        climate: "Khí hậu đại dương vô cùng ôn hòa dễ chịu, mùa đông ấm áp nhất đất nước và mùa hè đón nhận làn gió biển mát lành thổi mát cả thành phố. Rất thích hợp cho các bạn du học sinh thích hoạt động thể chất dã ngoại ngoài trời.",
+        population: "Dân số đạt hơn 3.3 triệu người. Người dân Busan vô cùng phóng khoáng, nồng hậu và mến khách, tạo cảm giác vô cùng ấm áp thân thiện và dễ dàng hòa nhập nhanh cho các sinh viên quốc tế."
+      },
+      "Incheon": {
+        title: "Thành phố Incheon",
+        subTitle: "Thành phố thông minh cửa ngõ • Hàn Quốc",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKnKVCtY7SUoZutfH3-YSKpatPvVD-_Jwk3lJ2GJzbIkYcmfBO-i2bKAyx&s=10",
+        overview: "Incheon sở hữu siêu sân bay quốc tế hàng đầu thế giới và đặc khu kinh tế Songdo kiểu mẫu toàn cầu. Đây là miền đất hứa cho sinh viên theo đuổi khối ngành kỹ thuật công nghệ cao, quản trị thương mại quốc tế và các cơ hội làm việc tại sân bay quốc tế lớn.",
+        climate: "Khí hậu ôn đới gió mùa mát mẻ trong lành chịu tác động từ hải lưu bờ Tây, mùa xuân và mùa thu đặc biệt dịu mát with không gian thiên nhiên lãng mạn vô bờ bến thích hợp nghiên cứu khoa học.",
+        population: "Gần 3 triệu công dân văn minh sinh sống. Cơ cấu dân số hiện đại, năng động, liên tục đón nhận các trí thức và sinh viên quốc tế đến hội tụ phát triển nghề nghiệp."
+      },
+      "Jeju": {
+        title: "Tỉnh Jeju",
+        subTitle: "Hòn đảo thiên đường du lịch xanh • Hàn Quốc",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMMCoZPrz64JyJi9zyp759TwZRw9FE4NZOdIKx-J0ezw&s=10",
+        overview: "Jeju là kỳ quan thiên nhiên thế giới UNESCO, hòn đảo xinh đẹp bình yên nhất châu Á. Nơi đây là điểm đến học tập tuyệt vời cho các nhóm ngành quản trị du lịch, khách sạn nghỉ dưỡng quốc tế và sinh học biển with các kỳ thực tập tại resort 5 sao.",
+        climate: "Khí hậu ôn đới hải dương cận nhiệt đới ấm áp dễ chịu quanh năm. Jeju là vùng đất ôn hòa nhất Hàn Quốc, cảnh quan thiên nhiên xanh tươi bốn mùa ngập tràn nắng ấm biển khơi trong vắt ngọt ngào.",
+        population: "Khoảng 670,000 dân cư hiền hậu chất phác. Môi trường an toàn kỷ lục, tỷ lệ tội phạm tiệm cận bằng không, cuộc sống học tập yên bình tuyệt đối giúp rèn luyện thể chất và tinh thần sáng suốt nhất."
+      },
+      "Gangwon": {
+        title: "Tỉnh Gangwon",
+        subTitle: "Thủ phủ du lịch sinh thái núi • Hàn Quốc",
+        image: "https://d3h30waly5w5yx.cloudfront.net/images/main/theme/cover/ski-resort-gangwon-korea-og.jpg",
+        overview: "Tỉnh du lịch sinh thái tuyệt mỹ with học phí và mức sinh hoạt phí siêu tiết kiệm.",
+        climate: "Mát mẻ vào mùa hè, mùa đông ngập tuyết trắng tuyệt đẹp lý tưởng để trượt tuyết.",
+        population: "Khoảng 1.5 triệu dân hiền hòa, nhịp sống thong thả giúp tập trung cao độ học tập."
+      },
+      "Gyeonggi": {
+        title: "Tỉnh Gyeonggi",
+        subTitle: "Vành đai công nghiệp & vệ tinh • Hàn Quốc",
+        image: "https://i.natgeofe.com/n/4c1babbe-42dd-445d-b9ab-5c34ac9e24d1/edited-GettyImages-917502636.jpg?w=2520&h=1680",
+        overview: "Vành đai công nghệ vệ tinh bao quanh Seoul, quy tụ đại bản doanh các tập đoàn lớn như Samsung.",
+        climate: "Thời tiết ôn đới khô ráo, mùa thu lá đỏ bao phủ các công viên đô thị hiện đại.",
+        population: "Đại tỉnh đông dân nhất Hàn Quốc (13.5 triệu dân), cơ hội việc làm sau tốt nghiệp cực lớn."
+      },
+      "Chungbuk": {
+        title: "Tỉnh Chungbuk",
+        subTitle: "Trọng điểm logistics nội địa • Hàn Quốc",
+        image: "https://chaovietnam.com.vn/wp-content/uploads/%EC%B6%A9%EB%B6%81%EB%8C%80%ED%95%99%EA%B5%90_%EC%A0%95%EB%AC%B8.jpg",
+        overview: "Trọng điểm giao thông nội địa, thế mạnh công nghệ sinh học và nông nghiệp thông minh.",
+        climate: "Thời tiết ôn đới khô ráo, bầu trời xanh ngắt lãng mạn quanh năm.",
+        population: "Khoảng 1.6 triệu dân chất phác, môi trường sống an lành, nồng hậu with du học sinh."
+      },
+      "Chungnam": {
+        title: "Tỉnh Chungnam",
+        subTitle: "Cửa ngõ khoa học công nghệ phía Nam • Hàn Quốc",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy0e9KOaKIcKWafE6SnoGw1e9U6L6pHRo1wvjb9fB4xswlyrcC-btildA&s=10",
+        overview: "Hành lang công nghiệp điện tử hiện đại, gắn kết sâu sắc with khu hành chính tự trị Sejong.",
+        climate: "Khí hậu cận duyên hải dễ chịu, sự giao thoa hài hòa giữa cảnh sắc núi đồi và biển khơi.",
+        population: "Gần 2.1 triệu dân năng động, đời sống phát triển, cơ hội việc làm phong phú."
+      },
+      "Jeonbuk": {
+        title: "Tỉnh Jeonbuk",
+        subTitle: "Cái nôi văn hóa ẩm thực truyền thống • Hàn Quốc",
+        image: "https://images.trvl-media.com/place/6129079/86aa11b4-801a-464d-b108-d71e7b44f33c.jpg",
+        overview: "Cái nôi bảo tồn di sản văn hóa, thế mạnh lớn về thiết kế, ẩm thực và mỹ thuật truyền thống.",
+        climate: "Khí hậu bốn mùa ôn hòa rõ rệt, đặc biệt lãng mạn lôi cuốn bên những góc làng cổ hanok.",
+        population: "Gần 1.8 triệu người hiếu khách, chi phí ăn uống và sinh hoạt vô cùng tiết kiệm."
+      },
+      "Jeonnam": {
+        title: "Tỉnh Jeonnam",
+        subTitle: "Vùng đất năng lượng xanh ven vịnh • Hàn Quốc",
+        image: "https://dvzpv6x5302g1.cloudfront.net/AcuCustom/Sitename/DAM/172/Jeonnam_1_project_in_Korea_cropped1_Main.png",
+        overview: "Vùng biển xanh trù phú đào tạo xuất sắc về kỹ thuật đóng tàu, công nghệ đại dương và năng lượng mới.",
+        climate: "Khí hậu ôn đới hải dương cực kỳ ấm áp nhờ dòng hải lưu ấm bờ Nam hỗ trợ.",
+        population: "Khoảng 1.8 triệu người sống hiền hòa bên bờ vịnh, thích hợp để tập trung học tập, nghiên cứu."
+      },
+      "Gyeongbuk": {
+        title: "Tỉnh Gyeongbuk",
+        subTitle: "Cố đô văn hóa hoàng gia Silla • Hàn Quốc",
+        image: "https://www.worldhistory.org/uploads/images/13347.jpg",
+        overview: "Cố đô văn hóa lịch sử, nổi bật về các khối khoa học xã hội nhân văn, di sản và cơ khí chính xác.",
+        climate: "Khí hậu lục địa sảng khoái with lượng nắng ấm dồi dào suốt các mùa trong năm.",
+        population: "Dân số 2.6 triệu người văn minh, lối sống kỷ cương, trân trọng các giá trị giáo dục lâu đời."
+      },
+      "Gyeongnam": {
+        title: "Tỉnh Gyeongnam",
+        subTitle: "Trọng điểm công nghiệp nặng hàng hải • Hàn Quốc",
+        image: "https://korea.stripes.com/travel/jinju-in-the-forest.jpeg/alternates/LANDSCAPE_910/korea-143763",
+        overview: "Trung tâm cơ khí thông minh, tự động hóa và các tổ hợp sản xuất hàng hải quy mô lớn.",
+        climate: "Khí hậu biển mát mẻ, điều hòa dễ chịu quanh năm nhờ nằm cạnh dải bờ duyên hải.",
+        population: "Hơn 3.3 triệu dân. Thị trường việc làm dồi dào mở rộng cơ hội cho kỹ sư quốc tế."
+      },
+      "Daejeon": {
+        title: "Thành phố Daejeon",
+        subTitle: "Thung lũng Silicon khoa học quốc gia • Hàn Quốc",
+        image: "https://transviet.com.vn/Media/Uploads/bai-viet-2025/du-lich-daejeon-han-quoc/du-lich-daejeon-han-quoc-1.jpg",
+        overview: "Thung lũng khoa học quốc gia nơi đặt viện KAIST, lý tưởng hàng đầu cho ngành AI, bán dẫn.",
+        climate: "Thời tiết ôn đới khô ráo mát mẻ, bao bọc bởi đồi thông xanh lãng mạn đầy cảm hứng.",
+        population: "Hơn 1.5 triệu dân có học vấn cao, cộng đồng tri thức văn minh và chuẩn mực."
+      },
+      "Sejong": {
+        title: "Thành phố Sejong",
+        subTitle: "Thành phố tự trị hành chính mới • Hàn Quốc",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1vckgKcUYjpZYs6G0D_mKKgCI9ok7rBLxWcL2Y1K9J-zPuERyU7zpuAmB&s=10",
+        overview: "Đô thị hành chính thông minh kiểu mới quy hoạch tuyệt đẹp, tuyệt đối an toàn và văn minh.",
+        climate: "Khí hậu trong lành tuyệt đối nhờ quy hoạch mật độ xanh lớn bao quanh vùng lõi hành chính.",
+        population: "Khoảng 380,000 công dân trẻ trí thức, chủ yếu là chuyên viên hành chính cao cấp."
+      },
+      "Daegu": {
+        title: "Thành phố Daegu",
+        subTitle: "Thành phố công nghệ dệt may & y dược • Hàn Quốc",
+        image: "https://img.magnific.com/free-photo/downtown-cityscape-night-seoul-south-korea_335224-272.jpg?semt=ais_test_b&w=740&q=80",
+        overview: "Cố đô thời trang dệt may, đồng thời nổi danh về ngành y học thẩm mỹ và dược phẩm tiên tiến.",
+        climate: "Thời tiết khô ráo nhiều nắng ấm vào mùa hè, se lạnh vào mùa đông.",
+        population: "Hơn 2.4 triệu dân thân thiện, nồng hậu cùng nhịp sống văn hóa trẻ trung sôi nổi."
+      },
+      "Ulsan": {
+        title: "Thành phố Ulsan",
+        subTitle: "Thủ phủ công nghiệp nặng giàu có • Hàn Quốc",
+        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
+        overview: "Thành phố giàu nhất Hàn Quốc về thu nhập đầu người, thế mạnh đóng tàu và cơ khí ô tô.",
+        climate: "Thời tiết ven biển phía Đông ấm áp mùa đông, lộng gió dễ chịu mát lành vào mùa hè.",
+        population: "Hơn 1.1 triệu dân sung túc. Hệ thống phúc lợi xã hội và an sinh tối tân vượt bậc."
+      },
+      "Gwangju": {
+        title: "Thành phố Gwangju",
+        subTitle: "Trọng điểm văn hóa nghệ thuật tự do • Hàn Quốc",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCU5YkEhVcyVQpWyXGl4WD46YvJwi_EWpHEcIb_oVLAxWlIBlNWghlzH-n&s=10",
+        overview: "Biểu tượng văn hóa đương đại rực rỡ, chi phí sinh hoạt siêu tiết kiệm, học bổng dồi dào.",
+        climate: "Thời tiết ôn hòa ngập tràn nắng vàng lấp lánh bên sườn đồi, hoa cỏ nở rực rỡ mùa xuân.",
+        population: "Khoảng 1.4 triệu dân mến khách, tạo cảm giác vô cùng ấm áp thân thiện cho du học sinh."
+      }
+    };
+
+    const MOCK_DATA = [
+      { rowNumber: 2, Khuvuc: "Seoul", Tentruong: "Đại học Quốc gia Seoul (SNU)", Loaihinh: "Đại học công lập", Xephang: "Top 1", Themanhdaotao: "Kỹ thuật, Y học, Kinh tế", Hocphi: "3,500,000 KRW/kỳ", Ghichu: "Ngôi trường danh giá bậc nhất Hàn Quốc với yêu cầu đầu vào khắc nghiệt và nhiều cơ hội học bổng và chế độ đãi ngộ xuất sắc trên cả nước." },
+      { rowNumber: 3, Khuvuc: "Daejeon", Tentruong: "Viện Khoa học và Công nghệ Tiên tiến Hàn Quốc (KAIST)", Loaihinh: "Đại học công lập", Xephang: "Top 1", Themanhdaotao: "AI, Công nghệ thông tin, Bán dẫn", Hocphi: "4,000,000 KRW/kỳ", Ghichu: "Cái nôi công nghệ thông tin lớn nhất và hỗ trợ học bổng toàn phần dành riêng cho sinh viên xuất sắc nghiên cứu khoa học." },
+      { rowNumber: 4, Khuvuc: "Seoul", Tentruong: "Đại học Yonsei", Loaihinh: "Đại học tư thục", Xephang: "Top 1", Themanhdaotao: "Quản trị kinh doanh, Ngoại giao", Hocphi: "3,800,000 KRW/kỳ", Ghichu: "Môi trường học thuật năng động toàn cầu, liên kết đối tác rộng mở đa dạng." },
+      { rowNumber: 5, Khuvuc: "Seoul", Tentruong: "Đại học Korea", Loaihinh: "Đại học tư thục", Xephang: "Top 1", Themanhdaotao: "Luật, Truyền thông, Y sinh", Hocphi: "3,900,000 KRW/kỳ", Ghichu: "Môi trường cổ kính, mang đậm phong cách hoàng gia, có câu lạc bộ sinh viên mạnh mẽ bậc nhất." },
+      { rowNumber: 6, Khuvuc: "Seoul", Tentruong: "Đại học Hanyang", Loaihinh: "Đại học tư thục", Xephang: "Top 1", Themanhdaotao: "Cơ khí, Xây dựng, Khoa học máy tính", Hocphi: "3,700,000 KRW/kỳ", Ghichu: "Thế mạnh cực đại về kỹ thuật, cung cấp nguồn nhân lực dồi dào cho các tập đoàn công nghệ lớn." },
+      { rowNumber: 7, Khuvuc: "Busan", Tentruong: "Đại học Quốc gia Pusan", Loaihinh: "Đại học công lập", Xephang: "Top 2", Themanhdaotao: "Hàng hải, Logistics, Du lịch", Hocphi: "2,200,000 KRW/kỳ", Ghichu: "Học phí rẻ, ký túc xá khang trang, cơ hội việc làm phong phú tại thành phố cảng cả nước." }
+    ];
+
+    const getMockMajorAnalysis = (majorName) => {
+      const formattedName = majorName.trim();
+      return `### BÁO CÁO PHÂN TÍCH CHUYÊN SÂU HƯỚNG NGHIỆP: ${formattedName.toUpperCase()}
+*(Dữ liệu phân tích giả định từ chuyên gia tư vấn du học Hàn Quốc)*
+
+1. TỔNG QUAN NGÀNH
+Ngành học **${formattedName}** là lĩnh vực nghiên cứu chuyên sâu về các kiến thức cốt lõi, quy trình ứng dụng thực tế và hệ thống công cụ hỗ trợ liên quan.
+* **Kiến thức & Kỹ năng đào tạo:** Sinh viên được rèn luyện tư duy phân tích hệ thống, kỹ năng vận hành thực tế, giải quyết vấn đề phức tạp và ứng dụng giải pháp công nghệ cao.
+* **Vị trí công việc phổ biến:** Chuyên viên hoạch định, quản lý dự án, kỹ sư triển khai, nhà nghiên cứu phát triển sản phẩm hoặc tư vấn giải pháp doanh nghiệp.
+
+2. TIỀM NĂNG PHÁT TRIỂN TRONG 5 - 10 NĂM TỚI
+Ngành học có tiềm năng cực lớn dựa trên những thay đổi về chuyển dịch số.
+* **Đánh giá triển vọng:** **9.2 / 10 điểm**.
+
+3. TRƯỜNG ĐẠI HỌC HÀN QUỐC PHÙ HỢP
+* **Đại học Quốc gia Seoul (SNU):** Tiên phong học thuật nghiên cứu đỉnh cao (Khu vực Seoul).
+* **Viện Khoa học & Công nghệ Tiên tiến Hàn Quốc (KAIST):** Cái nôi công nghệ và ứng dụng thực tiễn vượt trội (Khu vực Daejeon).
+* **Đại học Yonsei:** Thế mạnh về đào tạo liên kết doanh nghiệp (Khu vực Seoul).`;
+    };
+
+    const SouthKoreaFlag = () => (
+      <svg className="w-10 h-6.5 rounded shadow-sm border border-slate-200 flex-shrink-0 object-cover" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg">
+        <rect width="30" height="20" fill="white" />
+        <path d="M15,6 A4,4 0 0,0 15,14 A4,4 0 0,0 15,6 Z" fill="#0047a0" />
+        <path d="M15,6 A4,4 0 0,0 15,14 A2,2 0 0,0 15,10 A2,2 0 0,1 15,6 Z" fill="#cd2e3a" />
+        <path d="M11,10 A4,4 0 0,1 15,6 A2,2 0 0,1 15,10 A2,2 0 0,0 15,14 A4,4 0 0,1 11,10 Z" fill="#cd2e3a" />
+        <g transform="translate(6, 4) rotate(33.7) translate(-1.5, -2.5)" stroke="black" strokeWidth="0.75" fill="none">
+          <line x1="0" y1="0" x2="3" y2="0" />
+          <line x1="0" y1="1" x2="3" y2="1" />
+          <line x1="0" y1="2" x2="3" y2="2" />
+        </g>
+        <g transform="translate(24, 16) rotate(33.7) translate(-1.5, -2.5)" stroke="black" strokeWidth="0.75" fill="none">
+          <line x1="0" y1="0" x2="1.2" y2="0" /><line x1="1.8" y1="0" x2="3" y2="0" />
+          <line x1="0" y1="1" x2="1.2" y2="1" /><line x1="1.8" y1="1" x2="3" y2="1" />
+          <line x1="0" y1="2" x2="1.2" y2="2" /><line x1="1.8" y1="2" x2="3" y2="2" />
+        </g>
+        <g transform="translate(24, 4) rotate(-33.7) translate(-1.5, -2.5)" stroke="black" strokeWidth="0.75" fill="none">
+          <line x1="0" y1="0" x2="1.2" y2="0" /><line x1="1.8" y1="0" x2="3" y2="0" />
+          <line x1="0" y1="1" x2="3" y2="1" />
+          <line x1="0" y1="2" x2="1.2" y2="2" /><line x1="1.8" y1="2" x2="3" y2="2" />
+        </g>
+        <g transform="translate(6, 16) rotate(-33.7) translate(-1.5, -2.5)" stroke="black" strokeWidth="0.75" fill="none">
+          <line x1="0" y1="0" x2="3" y2="0" />
+          <line x1="0" y1="1" x2="1.2" y2="1" /><line x1="1.8" y1="1" x2="3" y2="1" />
+          <line x1="0" y1="2" x2="3" y2="2" />
+        </g>
+      </svg>
+    );
+
+    const getContextSnippet = (text, keyword, maxLen = 100) => {
+      if (!text || !keyword) return "";
+      const lowerText = text.toLowerCase();
+      const lowerKey = keyword.toLowerCase().trim();
+      const index = lowerText.indexOf(lowerKey);
+      if (index === -1) {
+        return text.length > maxLen ? text.substring(0, maxLen) + "..." : text;
+      }
+      let start = Math.max(0, index - Math.floor(maxLen / 2));
+      let end = Math.min(text.length, start + maxLen);
+      if (end === text.length) {
+        start = Math.max(0, end - maxLen);
+      }
+      let snippet = text.substring(start, end);
+      if (start > 0) snippet = "..." + snippet;
+      if (end < text.length) snippet = snippet + "...";
+      return snippet;
+    };
+
+    const removeAccents = (str) => {
+      if (!str) return '';
+      return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D');
+    };
+
+    const highlightText = (text, keyword) => {
+      if (!text || !keyword) return <span>{text}</span>;
+      const lowerText = text.toLowerCase();
+      const lowerKey = keyword.toLowerCase().trim();
+      if (!lowerKey) return <span>{text}</span>;
+      const index = lowerText.indexOf(lowerKey);
+      if (index === -1) {
+        // Fallback to checking the accentless version
+        const accLessText = removeAccents(lowerText);
+        const accLessKey = removeAccents(lowerKey);
+        const altIndex = accLessText.indexOf(accLessKey);
+        if (altIndex === -1) return <span>{text}</span>;
+        
+        const parts = [];
+        parts.push(text.substring(0, altIndex));
+        parts.push(
+          <mark key={altIndex} className="bg-yellow-200 text-yellow-900 font-bold px-0.5 rounded">
+            {text.substring(altIndex, altIndex + keyword.length)}
+          </mark>
+        );
+        parts.push(text.substring(altIndex + keyword.length));
+        return <>{parts}</>;
+      }
+
+      const parts = [];
+      let lastIndex = 0;
+      let searchIndex = 0;
+      while ((searchIndex = lowerText.indexOf(lowerKey, lastIndex)) !== -1) {
+        parts.push(text.substring(lastIndex, searchIndex));
+        parts.push(
+          <mark key={searchIndex} className="bg-yellow-200 text-yellow-900 font-bold px-0.5 rounded">
+            {text.substring(searchIndex, searchIndex + keyword.length)}
+          </mark>
+        );
+        lastIndex = searchIndex + keyword.length;
+      }
+      parts.push(text.substring(lastIndex));
+      return <>{parts}</>;
+    };
+
+    const sanitizeItems = (data) => {
+      if (!Array.isArray(data)) return [];
+      return data.map((item, idx) => {
+        const safeStr = (val) => {
+          if (val === null || val === undefined) return '';
+          return String(val).trim();
+        };
+
+        const lowerItem = {};
+        Object.keys(item).forEach(key => {
+          lowerItem[key.toLowerCase()] = item[key];
+        });
+
+        const getVal = (possibleKeys) => {
+          for (const k of possibleKeys) {
+            const lowerK = k.toLowerCase();
+            if (lowerItem[lowerK] !== undefined && lowerItem[lowerK] !== null) {
+              return lowerItem[lowerK];
+            }
+          }
+          return '';
+        };
+
+        const detectedName = getVal(['tentruong', 'ten', 'name']);
+        let detectedType = safeStr(getVal(['loaihinh', 'type', 'loai']));
+
+        const cleanType = detectedType.toLowerCase();
+        if (cleanType.includes("viện công nghệ") || cleanType.includes("vien cong nghe")) {
+          detectedType = "Viện công nghệ";
+        } else if (cleanType.includes("cao đẳng công lập") || cleanType.includes("cao dang cong lap") || cleanType.includes("cao đẳng công")) {
+          detectedType = "Cao đẳng công lập";
+        } else if (cleanType.includes("cao đẳng tư thục") || cleanType.includes("cao dang tu thuc") || cleanType.includes("cao đẳng tư")) {
+          detectedType = "Cao đẳng tư thục";
+        } else if (cleanType.includes("đại học tư thục") || cleanType.includes("dai hoc tu thuc") || cleanType.includes("đại học tư")) {
+          detectedType = "Đại học tư thục";
+        } else if (cleanType.includes("đại học công lập") || cleanType.includes("dai hoc cong lap") || cleanType.includes("đại học công") || cleanType.includes("công lập")) {
+          detectedType = "Đại học công lập";
+        } else {
+          detectedType = ""; 
+        }
+
+        let detectedRank = safeStr(getVal(['xephang', 'rank', 'ranking']));
+        if (detectedRank.includes("1")) {
+          detectedRank = "Top 1";
+        } else if (detectedRank.includes("2")) {
+          detectedRank = "Top 2";
+        } else if (detectedRank.includes("3")) {
+          detectedRank = "Top 3";
+        } else {
+          detectedRank = detectedRank ? detectedRank : "Top 1";
+        }
+
+        return {
+          rowNumber: item.rowNumber || item.rownumber || (idx + 2),
+          Khuvuc: safeStr(getVal(['khuvuc', 'region', 'khu vuc'])),
+          Tentruong: safeStr(detectedName),
+          Ten: safeStr(detectedName), 
+          Loaihinh: detectedType,
+          Xephang: detectedRank,
+          Themanhdaotao: safeStr(getVal(['themanhdaotao', 'themanh', 'strength'])),
+          Hocphi: safeStr(getVal(['hocphi', 'tuition', 'fee'])),
+          Ghichu: safeStr(getVal(['ghichu', 'note', 'notes']))
+        };
+      });
+    };
+
+    function App() {
+      const [leafletLoaded, setLeafletLoaded] = useState(false);
+      const [resourceDropdownOpen, setResourceDropdownOpen] = useState(false);
+
+      useEffect(() => {
+        if (window.L) {
+          setLeafletLoaded(true);
+          return;
+        }
+
+        const cssLink = document.createElement('link');
+        cssLink.rel = 'stylesheet';
+        cssLink.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(cssLink);
+
+        const jsScript = document.createElement('script');
+        jsScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        jsScript.async = true;
+        jsScript.onload = () => {
+          setLeafletLoaded(true);
+        };
+        document.body.appendChild(jsScript);
+      }, []);
+
+      const [apiUrl, setApiUrl] = useState(() => {
+        return localStorage.getItem('gs_api_url') || DEFAULT_API_URL;
+      });
+
+      const [geminiApiKey, setGeminiApiKey] = useState(() => {
+        return localStorage.getItem('gemini_api_key') || '';
+      });
+
+      const [items, setItems] = useState([]);
+      const [loading, setLoading] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [isUsingMock, setIsUsingMock] = useState(false);
+      const [alert, setAlert] = useState(null);
+      const [isSyncing, setIsSyncing] = useState(false);
+
+      const [modalOpen, setModalOpen] = useState(false);
+      const [editingItem, setEditingItem] = useState(null); 
+      const [dbConflictItem, setDbConflictItem] = useState(null);
+
+      const [isNotesExpanded, setIsNotesExpanded] = useState(false);
+
+      const [aiInput, setAiInput] = useState('');
+      const [aiResponse, setAiResponse] = useState('');
+      const [aiLoading, setAiLoading] = useState(false);
+      const [aiModalOpen, setAiModalOpen] = useState(false);
+
+      const [isSigExpanded, setIsSigExpanded] = useState(false);
+
+      const [selectedRegion, setSelectedRegion] = useState(null);
+      const [activeInfoTab, setActiveInfoTab] = useState('overview'); 
+      const [isRegionTextExpanded, setIsRegionTextExpanded] = useState(false);
+
+      const [showAllSchools, setShowAllSchools] = useState(false);
+      
+      const [activeDashboardView, setActiveDashboardView] = useState(null); // 'all_regions' | 'all_schools' | null
+
+      const [formData, setFormData] = useState({
+        Khuvuc: '',
+        Tentruong: '',
+        Loaihinh: '',
+        Xephang: '',
+        Themanhdaotao: '',
+        Hocphi: '',
+        Ghichu: ''
+      });
+
+      const mapRef = useRef(null);
+      const mapInstance = useRef(null);
+      const geoJsonLayerRef = useRef(null);
+      const hoveredLayerRef = useRef(null);
+
+      const selectedRegionRef = useRef(selectedRegion);
+
+      const handleZoomIn = () => {
+        if (mapInstance.current) {
+          mapInstance.current.zoomIn();
+        }
+      };
+
+      const handleZoomOut = () => {
+        if (mapInstance.current) {
+          mapInstance.current.zoomOut();
+        }
+      };
+
+      const regionsList = useMemo(() => {
+        const defaults = Array.from(new Set(Object.values(REGION_MAP)));
+        const fromDb = items.map(item => item.Khuvuc).filter(Boolean);
+        const combined = Array.from(new Set([...defaults, ...fromDb]));
+        return combined.sort((a, b) => a.localeCompare(b, 'vi'));
+      }, [items]);
+
+      const schoolTypesList = useMemo(() => {
+        return ["Đại học công lập", "Đại học tư thục", "Cao đẳng công lập", "Cao đẳng tư thục", "Viện công nghệ"];
+      }, []);
+
+      const rankingList = useMemo(() => {
+        return ["Top 1", "Top 2", "Top 3"];
+      }, []);
+
+      // Bộ lọc danh sách trường chính xác theo cột Khuvuc được chọn trên bản đồ
+      const regionSchools = useMemo(() => {
+        if (!selectedRegion) return [];
+        return items.filter(item => {
+          if (!item.Khuvuc) return false;
+          const dbKhuvuc = item.Khuvuc.trim();
+          const targetRegion = selectedRegion.trim();
+          
+          // So sánh trực tiếp không phân biệt hoa thường
+          if (dbKhuvuc.toLowerCase() === targetRegion.toLowerCase()) return true;
+          
+          // So sánh sau khi đã ánh xạ chuẩn hóa (Ví dụ: "서울특별시" -> "Seoul" và đối chiếu)
+          const mappedDb = REGION_MAP[dbKhuvuc] || dbKhuvuc;
+          const mappedTarget = REGION_MAP[targetRegion] || targetRegion;
+          return mappedDb.toLowerCase() === mappedTarget.toLowerCase();
+        });
+      }, [items, selectedRegion]);
+
+      // Dynamic Dashboard - Featured Regions logic
+      const featuredRegions = useMemo(() => {
+        const counts = {};
+        const activeItems = items.length > 0 ? items : sanitizeItems(MOCK_DATA);
+        activeItems.forEach(item => {
+          if (item.Khuvuc) {
+            counts[item.Khuvuc] = (counts[item.Khuvuc] || 0) + 1;
+          }
+        });
+        
+        // Populate standard default keys if empty
+        ["Seoul", "Busan", "Gyeonggi"].forEach(reg => {
+          if (counts[reg] === undefined) counts[reg] = 0;
+        });
+
+        const sorted = Object.entries(counts)
+          .map(([name, count]) => ({
+            name,
+            count,
+            image: REGIONS_INFO_DB[name]?.image || "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80"
+          }))
+          .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+        return sorted.slice(0, 3);
+      }, [items]);
+
+      // Dynamic Dashboard - Featured Schools logic (Top 4 based on Ghi chú length)
+      const featuredSchools = useMemo(() => {
+        const activeItems = items.length > 0 ? items : sanitizeItems(MOCK_DATA);
+        const sorted = [...activeItems].sort((a, b) => {
+          const lenA = a.Ghichu ? a.Ghichu.length : 0;
+          const lenB = b.Ghichu ? b.Ghichu.length : 0;
+          return lenB - lenA;
+        });
+        return sorted.slice(0, 4);
+      }, [items]);
+
+      useEffect(() => {
+        setIsRegionTextExpanded(false);
+      }, [selectedRegion, activeInfoTab]);
+
+      useEffect(() => {
+        selectedRegionRef.current = selectedRegion;
+        setShowAllSchools(false);
+        
+        if (geoJsonLayerRef.current) {
+          geoJsonLayerRef.current.eachLayer((layer) => {
+            const koName = layer.feature?.properties?.name || '';
+            const viName = REGION_MAP[koName] || koName;
+            
+            if (viName === selectedRegion) {
+              layer.setStyle({
+                className: 'selected-region-path',
+                weight: 1.1,          
+                color: '#34D399',     
+                fillOpacity: 1.0
+              });
+              if (layer._path) {
+                layer._path.classList.add('selected-region-path');
+              }
+              if (typeof layer.bringToFront === 'function') {
+                layer.bringToFront();
+              }
+            } else {
+              layer.setStyle({
+                className: '',
+                fillColor: '#FAFAFA', 
+                weight: 1.1,          
+                color: '#a8b5c6',     
+                fillOpacity: 1.0
+              });
+              if (layer._path) {
+                layer._path.classList.remove('selected-region-path');
+              }
+            }
+          });
+        }
+      }, [selectedRegion]);
+
+      const itemsRef = useRef(items);
+      useEffect(() => {
+        itemsRef.current = items;
+      }, [items]);
+
+      useEffect(() => {
+        if (alert) {
+          const timer = setTimeout(() => setAlert(null), 4000);
+          return () => clearTimeout(timer);
+        }
+      }, [alert]);
+
+      const fetchData = async (targetUrl = apiUrl, silent = false) => {
+        if (!targetUrl) {
+          setItems(sanitizeItems(MOCK_DATA));
+          setIsUsingMock(true);
+          return;
+        }
+        if (!silent) {
+          setLoading(true);
+        } else {
+          setIsSyncing(true);
+        }
+        try {
+          const separator = targetUrl.includes('?') ? '&' : '?';
+          const antiCacheParam = `&_t=${Date.now()}`;
+          const response = await fetch(`${targetUrl}${separator}action=read${antiCacheParam}`);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP Status ${response.status}`);
+          }
+          
+          const result = await response.json();
+          if (result.status === 'success') {
+            const sanitized = sanitizeItems(result.data);
+            
+            setItems(prev => {
+              if (JSON.stringify(prev) !== JSON.stringify(sanitized)) {
+                if (silent && prev.length > 0) {
+                  showAlert('Dữ liệu hệ thống vừa cập nhật tự động!', 'success');
+                }
+                return sanitized;
+              }
+              return prev;
+            });
+            setIsUsingMock(false);
+          } else {
+            throw new Error(result.message || 'Lỗi cấu trúc dữ liệu từ Web App');
+          }
+        } catch (error) {
+          console.warn("📊 [Hệ thống offline] Tự động chuyển sang chế độ Offline với dữ liệu cục bộ.");
+          if (!silent) {
+            setItems(sanitizeItems(MOCK_DATA));
+            setIsUsingMock(true);
+          }
+        } finally {
+          setLoading(false);
+          setIsSyncing(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchData();
+      }, [apiUrl]);
+
+      useEffect(() => {
+        if (isUsingMock) return;
+        const interval = setInterval(() => {
+          fetchData(apiUrl, true);
+        }, 5000);
+
+        return () => clearInterval(interval);
+      }, [apiUrl, isUsingMock]);
+
+      useEffect(() => {
+        if (!leafletLoaded || !mapRef.current || mapInstance.current) return;
+
+        let isCancelled = false;
+        const L = window.L;
+
+        const southKoreaBounds = L.latLngBounds(
+          L.latLng(32.8, 124.0), 
+          L.latLng(39.2, 131.2)  
+        );
+
+        const map = L.map(mapRef.current, {
+          center: [35.8, 127.8],
+          zoom: 7.2,               
+          minZoom: 7.2,            
+          maxZoom: 9.0,            
+          zoomSnap: 0.1,      
+          zoomDelta: 0.5,
+          zoomControl: false,      
+          dragging: true,
+          scrollWheelZoom: true,
+          maxBounds: southKoreaBounds,
+          maxBoundsViscosity: 0.95,  
+          attributionControl: false 
+        });
+
+        mapInstance.current = map;
+
+        map.on('click', (e) => {
+          setSelectedRegion(null);
+          setSearchQuery('');
+          setShowAllSchools(false);
+          setActiveDashboardView(null);
+        });
+
+        const mapStyle = {
+          color: "#a8b5c6",        
+          weight: 1.1,             
+          opacity: 1,
+          fillColor: "#FAFAFA",    
+          fillOpacity: 1.0        
+        };
+
+        const onEachFeature = (feature, layer) => {
+          const koName = feature.properties.name || '';
+          const viName = REGION_MAP[koName] || koName;
+
+          layer.on({
+            mouseover: (e) => {
+              const lyr = e.target;
+              
+              if (hoveredLayerRef.current && hoveredLayerRef.current !== lyr) {
+                const prevLyr = hoveredLayerRef.current;
+                const prevKo = prevLyr.feature?.properties?.name || '';
+                const prevVi = REGION_MAP[prevKo] || prevKo;
+                if (prevVi === selectedRegionRef.current) {
+                  prevLyr.setStyle({
+                    className: 'selected-region-path',
+                    weight: 1.1, 
+                    color: '#34D399',
+                    fillOpacity: 1.0
+                  });
+                } else {
+                  if (geoJsonLayerRef.current) {
+                    geoJsonLayerRef.current.resetStyle(prevLyr);
+                  }
+                }
+              }
+              
+              hoveredLayerRef.current = lyr;
+
+              if (viName === selectedRegionRef.current) {
+                lyr.setStyle({
+                  className: 'selected-region-path',
+                  weight: 1.1, 
+                  color: '#34D399',
+                  fillOpacity: 1.0
+                });
+              } else {
+                lyr.setStyle({
+                  fillColor: '#F1F5F9', 
+                  weight: 1.1, 
+                  color: '#94a3b8',     
+                  fillOpacity: 1.0
+                });
+              }
+
+              if (typeof lyr.bringToFront === 'function') {
+                lyr.bringToFront();
+              }
+            },
+            mouseout: (e) => {
+              const lyr = e.target;
+              if (viName === selectedRegionRef.current) {
+                lyr.setStyle({
+                  className: 'selected-region-path',
+                  weight: 1.1, 
+                  color: '#34D399',
+                  fillOpacity: 1.0
+                });
+              } else {
+                if (geoJsonLayerRef.current) {
+                  geoJsonLayerRef.current.resetStyle(lyr);
+                }
+              }
+              if (hoveredLayerRef.current === lyr) {
+                hoveredLayerRef.current = null;
+              }
+            },
+            click: (e) => {
+              L.DomEvent.stopPropagation(e);
+              setSelectedRegion(viName);
+              setActiveInfoTab('overview'); 
+              setSearchQuery(viName);       
+            }
+          });
+        };
+
+        fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo.json')
+          .then(res => res.json())
+          .then(data => {
+            if (isCancelled) return; 
+
+            const geoJsonLayer = L.geoJSON(data, {
+              style: mapStyle,
+              onEachFeature: onEachFeature
+            }).addTo(map);
+
+            geoJsonLayerRef.current = geoJsonLayer;
+            
+            geoJsonLayer.on('mouseleave', () => {
+              if (hoveredLayerRef.current) {
+                const prevLyr = hoveredLayerRef.current;
+                const prevKo = prevLyr.feature?.properties?.name || '';
+                const prevVi = REGION_MAP[prevKo] || prevKo;
+                if (prevVi === selectedRegionRef.current) {
+                  prevLyr.setStyle({
+                    className: 'selected-region-path',
+                    weight: 1.1,
+                    color: '#34D399',
+                    fillOpacity: 1.0
+                  });
+                } else {
+                  geoJsonLayer.resetStyle(prevLyr);
+                }
+                hoveredLayerRef.current = null;
+              }
+            });
+
+            map.fitBounds(geoJsonLayer.getBounds(), { padding: [15, 15] });
+
+            L.marker([36.3, 124.7], {
+              icon: L.divIcon({
+                html: '<div class="ocean-label">Hoàng Hải</div>',
+                className: 'custom-ocean-marker',
+                iconSize: [100, 30],
+                iconAnchor: [50, 15]
+              }),
+              interactive: false
+            }).addTo(map);
+
+            L.marker([36.7, 130.6], {
+              icon: L.divIcon({
+                html: '<div class="ocean-label">Biển Nhật Bản</div>',
+                className: 'custom-ocean-marker',
+                iconSize: [120, 30],
+                iconAnchor: [60, 15]
+              }),
+              interactive: false
+            }).addTo(map);
+
+            MAJOR_CITIES.forEach(city => {
+              const isGwangju = city.name === "Gwangju";
+              const html = `
+                <div class="pulse-container ${isGwangju ? 'gwangju-container' : ''}">
+                  <div class="static-dot"></div>
+                  <div class="pulse-label">${city.name}</div>
+                </div>
+              `;
+              const icon = L.divIcon({
+                html: html,
+                className: 'custom-pulse-marker',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+              });
+              const marker = L.marker(city.coords, { icon: icon }).addTo(map);
+              marker.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                setSelectedRegion(city.name);
+                setActiveInfoTab('overview');
+                setSearchQuery(city.name);
+              });
+            });
+
+            OTHER_PROVINCES.forEach(prov => {
+              const html = `
+                <div class="province-label-container">
+                  <div class="province-label-text">${prov.name}</div>
+                </div>
+              `;
+              const icon = L.divIcon({
+                html: html,
+                className: 'custom-province-marker',
+                iconSize: [80, 20],
+                iconAnchor: [40, 10]
+              });
+              const marker = L.marker(prov.coords, { icon: icon }).addTo(map);
+              marker.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                setSelectedRegion(prov.name);
+                setActiveInfoTab('overview');
+                setSearchQuery(prov.name);
+              });
+            });
+          })
+          .catch(err => {
+            if (isCancelled) return;
+            console.error('GeoJSON Loading Failed:', err);
+          });
+
+        return () => {
+          isCancelled = true;
+          if (mapInstance.current) {
+            mapInstance.current.remove();
+            mapInstance.current = null;
+          }
+        };
+      }, [leafletLoaded]); 
+
+      useEffect(() => {
+        if (!modalOpen || !editingItem || items.length === 0) return;
+        const freshItem = items.find(i => i.rowNumber === editingItem.rowNumber);
+        if (!freshItem) return;
+
+        const isDbChanged = 
+          freshItem.Khuvuc !== editingItem.Khuvuc ||
+          freshItem.Tentruong !== editingItem.Tentruong ||
+          freshItem.Loaihinh !== editingItem.Loaihinh ||
+          freshItem.Xephang !== editingItem.Xephang ||
+          freshItem.Themanhdaotao !== editingItem.Themanhdaotao ||
+          freshItem.Hocphi !== editingItem.Hocphi ||
+          freshItem.Ghichu !== editingItem.Ghichu;
+
+        if (isDbChanged) {
+          const isUserModified = 
+            formData.Khuvuc !== editingItem.Khuvuc ||
+            formData.Tentruong !== editingItem.Tentruong ||
+            formData.Loaihinh !== editingItem.Loaihinh ||
+            formData.Xephang !== editingItem.Xephang ||
+            formData.Themanhdaotao !== editingItem.Themanhdaotao ||
+            formData.Hocphi !== editingItem.Hocphi ||
+            formData.Ghichu !== editingItem.Ghichu;
+
+          if (!isUserModified) {
+            setFormData({
+              Khuvuc: freshItem.Khuvuc,
+              Tentruong: freshItem.Tentruong,
+              Loaihinh: freshItem.Loaihinh,
+              Xephang: freshItem.Xephang,
+              Themanhdaotao: freshItem.Themanhdaotao,
+              Hocphi: freshItem.Hocphi,
+              Ghichu: freshItem.Ghichu
+            });
+            setEditingItem(freshItem);
+            showAlert('Đã tự động cập nhật thông tin mới nhất từ database!', 'success');
+          } else {
+            setDbConflictItem(freshItem);
+          }
+        } else {
+          setDbConflictItem(null);
+        }
+      }, [items, modalOpen]);
+
+      const handleResolveConflict = () => {
+        if (!dbConflictItem) return;
+        setFormData({
+          Khuvuc: dbConflictItem.Khuvuc,
+          Tentruong: dbConflictItem.Tentruong,
+          Loaihinh: dbConflictItem.Loaihinh,
+          Xephang: dbConflictItem.Xephang,
+          Themanhdaotao: dbConflictItem.Themanhdaotao,
+          Hocphi: dbConflictItem.Hocphi,
+          Ghichu: dbConflictItem.Ghichu
+        });
+        setEditingItem(dbConflictItem);
+        setDbConflictItem(null);
+        showAlert('Đã đồng bộ dữ liệu mới nhất!', 'success');
+      };
+
+      const showAlert = (message, type = 'success') => {
+        setAlert({ message, type });
+      };
+
+      const handleOpenAdd = () => {
+        setEditingItem(null);
+        setDbConflictItem(null);
+        setIsNotesExpanded(false); 
+        
+        setFormData({
+          Khuvuc: selectedRegion || '', 
+          Tentruong: '',
+          Loaihinh: schoolTypesList[0] || 'Đại học công lập',
+          Xephang: rankingList[0] || 'Top 1',
+          Themanhdaotao: '',
+          Hocphi: '',
+          Ghichu: ''
+        });
+        setModalOpen(true);
+      };
+
+      const handleOpenEdit = (item) => {
+        setEditingItem(item);
+        setDbConflictItem(null);
+        setIsNotesExpanded(false); 
+        
+        setFormData({
+          Khuvuc: item.Khuvuc || '',
+          Tentruong: item.Tentruong || '',
+          Loaihinh: item.Loaihinh || schoolTypesList[0],
+          Xephang: item.Xephang || rankingList[0],
+          Themanhdaotao: item.Themanhdaotao || '',
+          Hocphi: item.Hocphi || '',
+          Ghichu: item.Ghichu || ''
+        });
+        setModalOpen(true);
+      };
+
+      const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!formData.Tentruong.trim()) {
+          showAlert('Tên trường không được để trống!', 'error');
+          return;
+        }
+
+        if (isUsingMock) {
+          if (editingItem) {
+            setItems(prev => sanitizeItems(prev.map(item => 
+              item.rowNumber === editingItem.rowNumber ? { ...item, ...formData } : item
+            )));
+            showAlert('Đã lưu chỉnh sửa!', 'success');
+          } else {
+            const newRowNumber = Math.max(...items.map(i => i.rowNumber), 1) + 1;
+            setItems(prev => sanitizeItems([...prev, { rowNumber: newRowNumber, ...formData }]));
+            showAlert('Đã thêm trường học thành công!', 'success');
+          }
+          setModalOpen(false);
+          return;
+        }
+
+        setLoading(true);
+        setModalOpen(false);
+
+        try {
+          const payload = {
+            action: editingItem ? 'update' : 'create',
+            rowNumber: editingItem ? editingItem.rowNumber : null,
+            Ten: formData.Tentruong,
+            Tentruong: formData.Tentruong,
+            ...formData
+          };
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.status === 'success') {
+            showAlert(editingItem ? 'Đã lưu chỉnh sửa thành công!' : 'Đã thêm thành công!', 'success');
+            await fetchData(apiUrl, false);
+          } else {
+            throw new Error(result.message);
+          }
+        } catch (error) {
+          showAlert('Lỗi đồng bộ Sheets! Đã lưu tạm dữ liệu cục bộ.', 'error');
+          if (editingItem) {
+            setItems(prev => sanitizeItems(prev.map(item => 
+              item.rowNumber === editingItem.rowNumber ? { ...item, ...formData } : item
+            )));
+          } else {
+            const newRowNumber = Math.max(...items.map(i => i.rowNumber), 1) + 1;
+            setItems(prev => sanitizeItems([...prev, { rowNumber: newRowNumber, ...formData }]));
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const handleDeleteItem = async (item, e) => {
+        e.stopPropagation();
+        if (isUsingMock) {
+          setItems(prev => prev.filter(i => i.rowNumber !== item.rowNumber));
+          showAlert('Đã xóa thành công!', 'success');
+          return;
+        }
+
+        setLoading(true);
+        try {
+          const payload = {
+            action: 'delete',
+            rowNumber: item.rowNumber
+          };
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.status === 'success') {
+            showAlert('Đã xóa thành công!', 'success');
+            await fetchData(apiUrl, false);
+          } else {
+            throw new Error(result.message);
+          }
+        } catch (error) {
+          setItems(prev => prev.filter(i => i.rowNumber !== item.rowNumber));
+          showAlert('Đã xóa thành công!', 'success');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const handleAiConsult = async (e) => {
+        e.preventDefault();
+        if (!aiInput.trim()) return;
+
+        setAiLoading(true);
+        setAiModalOpen(true);
+        const queryName = aiInput.trim();
+        setAiInput('');
+
+        const fullPrompt = `Bạn là chuyên gia tư vấn hướng nghiệp và du học Hàn Quốc... Hãy phân tích chuyên sâu ngành: ${queryName}`;
+
+        if (geminiApiKey.trim()) {
+          try {
+            const response = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey.trim()}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ text: fullPrompt }] }]
+                })
+              }
+            );
+
+            if (!response.ok) {
+              const errData = await response.json();
+              throw new Error(errData.error?.message || 'Lỗi gọi API Gemini');
+            }
+
+            const data = await response.json();
+            const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (generatedText) {
+              setAiResponse(generatedText);
+            } else {
+              setAiResponse("Không nhận được dữ liệu phản hồi từ Gemini. Sếp vui lòng kiểm tra lại Key.");
+            }
+          } catch (error) {
+            console.error("Gemini API Error, using realistic mock template:", error);
+            showAlert('Lỗi kết nối Gemini API. Sử dụng dữ liệu phân tích hướng nghiệp dự phòng!', 'error');
+            setAiResponse(getMockMajorAnalysis(queryName));
+          } finally {
+            setAiLoading(false);
+          }
+        } else {
+          setTimeout(() => {
+            setAiResponse(getMockMajorAnalysis(queryName));
+            setAiLoading(false);
+          }, 1200);
+        }
+      };
+
+      const handleSaveApiKey = (key) => {
+        setGeminiApiKey(key);
+        localStorage.setItem('gemini_api_key', key);
+        showAlert('Đã lưu Gemini API Key thành công!', 'success');
+      };
+
+      const filteredItems = useMemo(() => {
+        return items.filter(item => {
+          const query = searchQuery.toLowerCase().trim();
+          if (!query) return true;
+
+          const normalizedQuery = removeAccents(query);
+
+          const tentruong = item.Tentruong.toLowerCase();
+          const normalizedTentruong = removeAccents(tentruong);
+
+          const ten = item.Ten ? item.Ten.toLowerCase() : '';
+          const normalizedTen = removeAccents(ten);
+
+          const khuvuc = item.Khuvuc.toLowerCase();
+          const normalizedKhuvuc = removeAccents(khuvuc);
+
+          const themanh = item.Themanhdaotao.toLowerCase();
+          const normalizedThemanh = removeAccents(themanh);
+
+          const ghichu = item.Ghichu.toLowerCase();
+          const normalizedGhichu = removeAccents(ghichu);
+
+          const loaihinh = item.Loaihinh.toLowerCase();
+          const normalizedLoaihinh = removeAccents(loaihinh);
+
+          return tentruong.includes(query) || normalizedTentruong.includes(normalizedQuery) ||
+                 ten.includes(query) || normalizedTen.includes(normalizedQuery) ||
+                 themanh.includes(query) || normalizedThemanh.includes(normalizedQuery) ||
+                 ghichu.includes(query) || normalizedGhichu.includes(normalizedQuery) ||
+                 khuvuc.includes(query) || normalizedKhuvuc.includes(normalizedQuery) ||
+                 loaihinh.includes(query) || normalizedLoaihinh.includes(normalizedQuery);
+        });
+      }, [items, searchQuery]);
+
+      const renderSearchSnippet = (item) => {
+        if (!searchQuery.trim()) return null;
+        const lowerQuery = searchQuery.toLowerCase().trim();
+        const matches = [];
+
+        if (item.Ghichu && (item.Ghichu.toLowerCase().includes(lowerQuery) || removeAccents(item.Ghichu.toLowerCase()).includes(removeAccents(lowerQuery)))) {
+          matches.push({
+            field: "Ghi chú",
+            node: highlightText(getContextSnippet(item.Ghichu, searchQuery), searchQuery)
+          });
+        }
+        if (item.Themanhdaotao && (item.Themanhdaotao.toLowerCase().includes(lowerQuery) || removeAccents(item.Themanhdaotao.toLowerCase()).includes(removeAccents(lowerQuery)))) {
+          matches.push({
+            field: "Thế mạnh",
+            node: highlightText(getContextSnippet(item.Themanhdaotao, searchQuery), searchQuery)
+          });
+        }
+
+        if (matches.length === 0) return null;
+
+        return (
+          <div className="mt-2 p-2 bg-slate-50/75 rounded-lg border border-slate-100/50 space-y-1 text-xs text-slate-600">
+            {matches.map((match, i) => (
+              <div key={i} className="leading-relaxed">
+                <span className="font-bold text-slate-700 text-[11px]">{match.field}: </span>
+                <span className="italic">{match.node}</span>
+              </div>
+            ))}
+          </div>
+        );
+      };
+
+      const handleSearchInputFocus = () => {
+        if (selectedRegion) {
+          setSelectedRegion(null);
+          setSearchQuery('');
+          if (mapInstance.current) {
+            mapInstance.current.setView([35.8, 127.8], 7.2);
+          }
+        }
+      };
+
+      const selectedRegionData = selectedRegion ? REGIONS_INFO_DB[selectedRegion] : null;
+
+      const currentProfileText = useMemo(() => {
+        if (!selectedRegionData) return "";
+        if (activeInfoTab === 'overview') return selectedRegionData.overview;
+        if (activeInfoTab === 'climate') return selectedRegionData.climate;
+        return selectedRegionData.population;
+      }, [selectedRegionData, activeInfoTab]);
+
+      const shouldTruncateProfileText = useMemo(() => {
+        return currentProfileText && currentProfileText.length > 150;
+      }, [currentProfileText]);
+
+      const displayedProfileText = useMemo(() => {
+        if (shouldTruncateProfileText && !isRegionTextExpanded) {
+          return currentProfileText.substring(0, 150) + "...";
+        }
+        return currentProfileText;
+      }, [currentProfileText, shouldTruncateProfileText, isRegionTextExpanded]);
+
+      return (
+        <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased flex flex-col h-screen overflow-hidden text-sm sm:text-base">
+          
+          {/* HEADER SECTION */}
+          <header className="bg-white border-b border-slate-200 shadow-sm flex-shrink-0 z-40">
+            <div className="w-full flex items-center justify-between">
+              
+              {/* Left Header */}
+              <div className="flex-1 py-[11px] px-[32px] flex items-center">
+                <div 
+                  className="flex items-center gap-[20px] flex-shrink-0 cursor-pointer"
+                  onClick={() => {
+                    setSelectedRegion(null);
+                    setActiveDashboardView(null);
+                    setSearchQuery('');
+                  }}
+                >
+                  <SouthKoreaFlag />
+                  <div className="flex flex-col justify-center">
+                    <h1 className="text-[30px] font-semibold text-[#1E293B] tracking-[-0.02em] leading-tight">
+                      Tra cứu thông tin du học Hàn Quốc
+                    </h1>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Header */}
+              <div className="w-[500px] max-w-[500px] flex-shrink-0 h-full flex items-center justify-end px-8 bg-white">
+                <div className="relative">
+                  <button
+                    onClick={() => setResourceDropdownOpen(!resourceDropdownOpen)}
+                    className="flex items-center gap-1.5 px-4 h-8 text-xs font-semibold rounded-xl bg-white border border-[#E5E7EB] hover:bg-slate-50 text-slate-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] active:scale-95"
+                    title="Mở tài nguyên du học tuyển sinh"
+                  >
+                    <span>Tài nguyên</span>
+                    <ChevronDown size={14} className={`text-slate-500 transition-transform duration-200 ${resourceDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {resourceDropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setResourceDropdownOpen(false)}></div>
+                      <div className="absolute right-0 mt-2 w-52 bg-white border border-[#E5E7EB] rounded-[16px] shadow-lg py-1.5 z-50 animate-fadeIn flex flex-col gap-0.5">
+                        <a
+                          href="https://drive.google.com/drive/folders/15MfOYtg30iIrWpAPNxNuY5zmUj7BctiV"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-center gap-3 mx-1.5 px-3.5 py-2 text-xs text-slate-700 rounded-xl border border-transparent hover:bg-emerald-50/60 hover:text-emerald-700 hover:shadow-[0_2px_8px_rgba(16,185,129,0.06)] hover:-translate-y-0.5 transition-all duration-200"
+                          onClick={() => setResourceDropdownOpen(false)}
+                        >
+                          <Briefcase size={15} className="text-slate-500 group-hover:text-emerald-600 transition-colors" />
+                          <span className="font-semibold">Sale Kit</span>
+                        </a>
+                        <a
+                          href="https://drive.google.com/drive/folders/1QTApZT_5OVR25VvzXAzkiDhhkarfNcx_"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-center gap-3 mx-1.5 px-3.5 py-2 text-xs text-slate-700 rounded-xl border border-transparent hover:bg-emerald-50/60 hover:text-emerald-700 hover:shadow-[0_2px_8px_rgba(16,185,129,0.06)] hover:-translate-y-0.5 transition-all duration-200"
+                          onClick={() => setResourceDropdownOpen(false)}
+                        >
+                          <BookOpen size={15} className="text-slate-500 group-hover:text-emerald-600 transition-colors" />
+                          <span className="font-semibold">Tài liệu tư vấn</span>
+                        </a>
+                        <a
+                          href="https://drive.google.com/drive/folders/1xw9vP-c67f4TKmzn1umCOzTMLiUOiIxR"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-center gap-3 mx-1.5 px-3.5 py-2 text-xs text-slate-700 rounded-xl border border-transparent hover:bg-emerald-50/60 hover:text-emerald-700 hover:shadow-[0_2px_8px_rgba(16,185,129,0.06)] hover:-translate-y-0.5 transition-all duration-200"
+                          onClick={() => setResourceDropdownOpen(false)}
+                        >
+                          <School size={15} className="text-slate-500 group-hover:text-emerald-600 transition-colors" />
+                          <span className="font-semibold">Thông tin trường</span>
+                        </a>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </header>
+
+          {/* MAIN INTERACTIVE INTERFACE */}
+          <div className="flex flex-1 overflow-hidden relative">
+
+            {/* MAP CONTAINER - Left side */}
+            <main className="flex-1 overflow-hidden bg-slate-50 relative flex flex-col">
+              <div className="flex-1 relative bg-white">
+                {!leafletLoaded && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 animate-pulse bg-white/80 z-[1000]">
+                    <RefreshCw className="animate-spin text-emerald-600" size={26} />
+                    <span className="text-xs sm:text-sm text-slate-500 font-semibold">Đang nạp tọa độ bản đồ Hàn Quốc...</span>
+                  </div>
+                )}
+                
+                {/* Leaflet Map Target */}
+                <div 
+                  ref={mapRef} 
+                  className="w-full h-full"
+                  style={{ minHeight: '100%' }}
+                ></div>
+
+                {/* Floating Zoom Controls */}
+                <div className="absolute bottom-6 left-6 z-[1000] flex flex-col bg-white border border-slate-200/85 shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-2xl overflow-hidden w-11">
+                  <button
+                    onClick={handleZoomIn}
+                    className="w-11 h-11 flex items-center justify-center hover:bg-slate-50 active:bg-slate-100 transition-colors text-slate-600 focus:outline-none"
+                    title="Phóng to"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <div className="h-[1px] bg-slate-100 mx-2" />
+                  <button
+                    onClick={handleZoomOut}
+                    className="w-11 h-11 flex items-center justify-center hover:bg-slate-50 active:bg-slate-100 transition-colors text-slate-600 focus:outline-none"
+                    title="Thu nhỏ"
+                  >
+                    <Minus size={16} />
+                  </button>
+                </div>
+
+                {/* Floating Premium Signature launch-badge */}
+                <div 
+                  className="absolute bottom-4 right-4 z-[1000] text-white select-none cursor-pointer overflow-hidden backdrop-blur-md transition-all will-change-[width]"
+                  style={{
+                    width: isSigExpanded ? '210px' : '120px',
+                    height: '48px',
+                    borderRadius: '16px',
+                    transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.15)',
+                  }}
+                  onMouseEnter={() => setIsSigExpanded(true)}
+                  onMouseLeave={() => setIsSigExpanded(false)}
+                  onClick={() => setIsSigExpanded(!isSigExpanded)}
+                >
+                  <div 
+                    className="absolute inset-0 pointer-events-none opacity-20 z-10"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 50%)'
+                    }}
+                  />
+                  
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center whitespace-nowrap text-[11px] font-medium tracking-wide text-white/90"
+                    style={{
+                      opacity: isSigExpanded ? 0 : 1,
+                      transform: isSigExpanded ? 'scale(0.92) translateX(-10px)' : 'scale(1) translateX(0)',
+                      pointerEvents: isSigExpanded ? 'none' : 'auto',
+                      transition: 'opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  >
+                    <span className="flex items-center">
+                      © Đôn Nguyễn
+                    </span>
+                  </div>
+
+                  <div 
+                    className="absolute inset-0 flex flex-col justify-center text-left pl-4 leading-none space-y-1"
+                    style={{
+                      opacity: isSigExpanded ? 1 : 0,
+                      transform: isSigExpanded ? 'scale(1) translateX(0)' : 'scale(1.05) translateX(10px)',
+                      pointerEvents: isSigExpanded ? 'auto' : 'none',
+                      transition: 'opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}
+                  >
+                    <div className="flex items-center">
+                      <span className="font-extrabold text-[8.5px] text-emerald-400 tracking-wider uppercase">
+                        Korea University Search
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-normal" style={{ color: '#FFFFFF' }}>
+                      Created by: Đôn Nguyễn
+                    </p>
+                    <p className="text-[8px] tracking-wide font-normal" style={{ color: '#FFFFFF' }}>
+                      © 2026 All Rights Reserved
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </main>
+
+            {/* SIDEBAR COMPONENT - Right side */}
+            <aside className="w-[500px] max-w-[500px] border-l border-slate-200 bg-white flex flex-col flex-shrink-0 z-20 h-full shadow-md relative">
+              
+              {/* Search Bar */}
+              <div className={`${
+                selectedRegion && !showAllSchools 
+                  ? "absolute top-5 left-5 right-5 z-30 bg-white/95 backdrop-blur-sm shadow-lg rounded-xl p-2 border border-[#E5E7EB] transition-all duration-300" 
+                  : "p-3 bg-white border-b border-slate-100 flex-shrink-0 z-30 transition-all duration-300"
+              }`}>
+                <div className="flex gap-2 items-center">
+                  <div className="relative flex-1">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Search className="h-4 w-4 text-slate-400" />
+                    </span>
+                    <input
+                      type="text"
+                      className="w-full pl-9 pr-3 h-[36px] bg-white border border-[#E5E7EB] rounded-lg text-xs sm:text-sm placeholder:text-[11px] sm:placeholder:text-[11.5px] placeholder-slate-400/80 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 shadow-sm transition-all text-slate-800 font-medium"
+                      placeholder="Tìm trường, ngành học hoặc khu vực"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onClick={handleSearchInputFocus}
+                      onFocus={handleSearchInputFocus}
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleOpenAdd}
+                    className="w-8 h-8 bg-white text-emerald-600 rounded-full active:scale-95 transition-all flex items-center justify-center border border-emerald-500/40 flex-shrink-0 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(16,185,129,0.12)] hover:border-emerald-500"
+                    title="Thêm trường đại học mới"
+                  >
+                    <Plus size={15} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Content Area of Sidebar */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
+                
+                {!selectedRegion && !activeDashboardView && (
+                  <div className="px-3 py-2 flex-shrink-0">
+                    <div className="flex items-start gap-2 px-3 py-1.5 bg-emerald-50/60 rounded-xl text-slate-600">
+                      <Lightbulb size={14} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-[11px] sm:text-[11.5px] leading-snug font-medium text-slate-500">
+                        Chọn khu vực trên bản đồ hoặc nhập từ khóa để bắt đầu.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* STATE 1: DISPLAY REGION INFORMATION CARD */}
+                {selectedRegion && selectedRegionData ? (
+                  <div className="animate-fadeIn flex flex-col flex-1 text-xs sm:text-sm">
+                    {showAllSchools ? (
+                      <div className="flex flex-col flex-1">
+                        <div className="sticky top-0 bg-white border-b border-slate-100 p-3 flex items-center justify-between z-10 shadow-sm flex-shrink-0">
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => setShowAllSchools(false)}
+                              className="p-1 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors flex items-center justify-center border border-slate-100"
+                              title="Quay lại Tổng quan"
+                            >
+                              <ChevronLeft size={18} />
+                            </button>
+                            <h3 className="text-xs font-extrabold text-slate-950 uppercase tracking-wider">
+                              Tất cả trường tại {selectedRegion}
+                            </h3>
+                          </div>
+                          <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                            {regionSchools.length} trường
+                          </span>
+                        </div>
+                        
+                        {/* Full School List */}
+                        <div className="p-3 space-y-2 overflow-y-auto custom-scrollbar">
+                          {regionSchools.length > 0 ? (
+                            regionSchools.map((item, idx) => (
+                              <div
+                                key={idx}
+                                onClick={() => handleOpenEdit(item)}
+                                style={{ animationDelay: `${idx * 60}ms` }}
+                                className="animate-stagger bg-white py-2 px-3.5 rounded-[16px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border-none hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col gap-1.5"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <h5 className="font-bold text-slate-950 text-xs sm:text-sm truncate">
+                                    {idx + 1}. {item.Tentruong}
+                                  </h5>
+                                  <RankBadge rank={item.Xephang} />
+                                </div>
+                                <div className="flex justify-between items-center text-[10px] sm:text-xs text-slate-500">
+                                  <span className="truncate flex items-center gap-1">
+                                    📍 {item.Khuvuc || "Chưa xác định"}
+                                  </span>
+                                </div>
+                                {item.Themanhdaotao && (
+                                  <p className="text-xs leading-snug mt-1 pl-1 border-l border-slate-200 truncate" title={item.Themanhdaotao}>
+                                    <span className="text-slate-900 font-bold">Thế mạnh đào tạo: </span>
+                                    <span className="text-emerald-600 font-medium">{item.Themanhdaotao}</span>
+                                  </p>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-6 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-100">
+                              Chưa có dữ liệu trường học trong khu vực này.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Selected Region's Hero Image */}
+                        <div className="relative h-[180px] mx-3 mt-3 rounded-[18px] bg-slate-100 overflow-hidden flex-shrink-0 shadow-sm border border-slate-100">
+                          <img 
+                            src={selectedRegionData.image} 
+                            alt={selectedRegion} 
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            onError={(e) => {
+                              e.target.src = "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80";
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
+                          <div className="absolute bottom-3 left-4 right-4 text-white flex flex-col gap-1">
+                            <h3 className="text-sm sm:text-base font-extrabold tracking-tight">{selectedRegionData.title}</h3>
+                            <p className="text-xs text-slate-200 font-medium flex items-center gap-1 mt-0.5">
+                              📍 {selectedRegionData.subTitle}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Region Info Tabs */}
+                        <div className="p-3 bg-transparent border-b-2 border-slate-100 flex-shrink-0">
+                          <div className="p-0.5 bg-slate-100/60 rounded-xl flex gap-1 items-center mb-3 h-8">
+                            <button
+                              onClick={() => setActiveInfoTab('overview')}
+                              className={`flex-1 text-center py-1 h-6 text-[11px] sm:text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center ${
+                                activeInfoTab === 'overview' 
+                                  ? 'bg-emerald-50 text-emerald-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)]' 
+                                  : 'text-slate-500 hover:text-slate-700'
+                              }`}
+                            >
+                              Tổng quan
+                            </button>
+                            <button
+                              onClick={() => setActiveInfoTab('climate')}
+                              className={`flex-1 text-center py-1 h-6 text-[11px] sm:text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center ${
+                                activeInfoTab === 'climate' 
+                                  ? 'bg-emerald-50 text-emerald-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)]' 
+                                  : 'text-slate-500 hover:text-slate-700'
+                              }`}
+                            >
+                              Khí hậu
+                            </button>
+                            <button
+                              onClick={() => setActiveInfoTab('population')}
+                              className={`flex-1 text-center py-1 h-6 text-[11px] sm:text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center ${
+                                activeInfoTab === 'population' 
+                                  ? 'bg-emerald-50 text-emerald-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)]' 
+                                  : 'text-slate-500 hover:text-slate-700'
+                              }`}
+                            >
+                              Dân số
+                            </button>
+                          </div>
+
+                          <div 
+                            key={activeInfoTab}
+                            className="rounded-xl p-4 border border-slate-100 bg-[#FAFAFC] shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-start gap-3.5 transition-all duration-200 ease-out transform animate-fadeIn"
+                          >
+                            {activeInfoTab === 'overview' && (
+                              <>
+                                <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                                  <Info size={15} className="text-emerald-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-medium">
+                                    {displayedProfileText}
+                                  </p>
+                                  {shouldTruncateProfileText && (
+                                    <button 
+                                      onClick={() => setIsRegionTextExpanded(!isRegionTextExpanded)}
+                                      className="text-emerald-600 hover:text-emerald-700 font-bold text-xs mt-1.5 focus:outline-none transition-colors"
+                                    >
+                                      {isRegionTextExpanded ? "Thu gọn" : "Xem thêm"}
+                                    </button>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                            {activeInfoTab === 'climate' && (
+                              <>
+                                <div className="w-8 h-8 rounded-full bg-amber-50/80 flex items-center justify-center flex-shrink-0">
+                                  <Thermometer size={15} className="text-amber-500" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-medium">
+                                    {displayedProfileText}
+                                  </p>
+                                  {shouldTruncateProfileText && (
+                                    <button 
+                                      onClick={() => setIsRegionTextExpanded(!isRegionTextExpanded)}
+                                      className="text-emerald-600 hover:text-emerald-700 font-bold text-xs mt-1.5 focus:outline-none transition-colors"
+                                    >
+                                      {isRegionTextExpanded ? "Thu gọn" : "Xem thêm"}
+                                    </button>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                            {activeInfoTab === 'population' && (
+                              <>
+                                <div className="w-8 h-8 rounded-full bg-blue-50/80 flex items-center justify-center flex-shrink-0">
+                                  <Users size={15} className="text-blue-500" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-medium">
+                                    {displayedProfileText}
+                                  </p>
+                                  {shouldTruncateProfileText && (
+                                    <button 
+                                      onClick={() => setIsRegionTextExpanded(!isRegionTextExpanded)}
+                                      className="text-emerald-600 hover:text-emerald-700 font-bold text-xs mt-1.5 focus:outline-none transition-colors"
+                                    >
+                                      {isRegionTextExpanded ? "Thu gọn" : "Xem thêm"}
+                                    </button>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* List of Schools */}
+                        <div className="p-3 bg-slate-50/50 flex-1 overflow-y-auto custom-scrollbar">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                              Trường học tại {selectedRegion} ({regionSchools.length})
+                            </h4>
+                            {regionSchools.length > 0 && (
+                              <button
+                                onClick={() => setShowAllSchools(true)}
+                                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors flex items-center gap-0.5"
+                              >
+                                Xem tất cả
+                              </button>
+                            )}
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {regionSchools.slice(0, 10).length > 0 ? (
+                              regionSchools.slice(0, 10).map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  onClick={() => handleOpenEdit(item)}
+                                  style={{ animationDelay: `${idx * 60}ms` }}
+                                  className="animate-stagger bg-white py-2 px-3.5 rounded-[16px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border-none hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col gap-1.5"
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <h5 className="font-bold text-slate-950 text-xs sm:text-sm truncate">
+                                      {idx + 1}. {item.Tentruong}
+                                    </h5>
+                                    <RankBadge rank={item.Xephang} />
+                                  </div>
+                                  <div className="flex justify-between items-center text-[10px] sm:text-xs text-slate-500">
+                                    <span className="truncate flex items-center gap-1">
+                                      📍 {item.Khuvuc || "Chưa xác định"}
+                                    </span>
+                                  </div>
+                                  {item.Themanhdaotao && (
+                                    <p className="text-xs leading-snug mt-1 pl-1 border-l border-slate-200 truncate" title={item.Themanhdaotao}>
+                                      <span className="text-slate-900 font-bold">Thế mạnh đào tạo: </span>
+                                      <span className="text-emerald-600 font-medium">{item.Themanhdaotao}</span>
+                                    </p>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-6 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-100">
+                                Chưa có dữ liệu trường học trong khu vực này.
+                              </div>
+                            )}
+                            
+                            {regionSchools.length > 10 && (
+                              <div className="pt-2 text-center">
+                                <p className="text-xs text-slate-400 font-medium mb-1">
+                                  Còn {regionSchools.length - 10} trường khác...
+                                </p>
+                                <button 
+                                  onClick={() => setShowAllSchools(true)}
+                                  className="text-xs sm:text-sm font-bold text-emerald-600 hover:underline"
+                                >
+                                  Xem tất cả danh sách
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ) : activeDashboardView === 'all_regions' ? (
+                  /* PANEL: ALL REGIONS VIEW (Slide-in) */
+                  <div className="animate-slide-left flex flex-col flex-1">
+                    <div className="sticky top-0 bg-white border-b border-slate-100 p-3.5 flex items-center justify-between z-10 shadow-sm flex-shrink-0">
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setActiveDashboardView(null)}
+                          className="p-1 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors flex items-center justify-center border border-slate-100"
+                        >
+                          <ChevronLeft size={18} />
+                        </button>
+                        <h3 className="text-[12px] font-semibold text-[#64748B] uppercase tracking-[0.08em]">
+                          Tất cả khu vực tại Hàn Quốc
+                        </h3>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3.5 space-y-3 overflow-y-auto custom-scrollbar">
+                      {regionsList.map((region, idx) => {
+                        const count = items.filter(item => item.Khuvuc === region).length;
+                        const metadata = REGIONS_INFO_DB[region] || {
+                          subTitle: "Vùng lãnh thổ tự nhiên • Hàn Quốc",
+                          image: "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80"
+                        };
+                        return (
+                          <div
+                            key={region}
+                            onClick={() => {
+                              setSelectedRegion(region);
+                              setActiveInfoTab('overview');
+                              setActiveDashboardView(null);
+                            }}
+                            style={{ animationDelay: `${idx * 40}ms` }}
+                            className="animate-stagger bg-white border border-slate-100 rounded-[20px] shadow-sm hover:shadow-md transition-all p-3.5 cursor-pointer flex gap-4 hover:-translate-y-0.5"
+                          >
+                            <img 
+                              src={metadata.image} 
+                              alt={region} 
+                              className="w-16 h-16 rounded-2xl object-cover flex-shrink-0" 
+                            />
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                              <h4 className="font-bold text-slate-900 text-xs sm:text-sm">{region}</h4>
+                              <p className="text-[10.5px] text-slate-600 font-normal opacity-80 leading-normal mt-1.5 truncate">{metadata.subTitle}</p>
+                              <span className="text-[10px] font-bold text-emerald-600 mt-1.5">{count} trường trong khu vực</span>
+                            </div>
+                            <div className="self-center text-slate-300">
+                              <ChevronRight size={16} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : activeDashboardView === 'all_schools' ? (
+                  /* PANEL: ALL SCHOOLS VIEW (Slide-in) */
+                  <div className="animate-slide-left flex flex-col flex-1">
+                    <div className="sticky top-0 bg-white border-b border-slate-100 p-3.5 flex items-center justify-between z-10 shadow-sm flex-shrink-0">
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setActiveDashboardView(null)}
+                          className="p-1 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors flex items-center justify-center border border-slate-100"
+                        >
+                          <ChevronLeft size={18} />
+                        </button>
+                        <h3 className="text-xs font-extrabold text-slate-950 uppercase tracking-wider">
+                          Toàn bộ trường học ({filteredItems.length})
+                        </h3>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3.5 space-y-3 overflow-y-auto custom-scrollbar">
+                      {filteredItems.map((item, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => handleOpenEdit(item)}
+                          style={{ animationDelay: `${idx * 45}ms` }}
+                          className="animate-stagger bg-white hover:bg-slate-50/80 border border-slate-50 rounded-[20px] p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center gap-3.5"
+                        >
+                          {/* Graduation cap icon in blue (#2563EB) and stroke 1.5 */}
+                          <div className="w-8 h-8 rounded-xl bg-blue-50/70 border border-blue-100/50 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 flex-shrink-0">
+                              <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+                              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+                            </svg>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <h5 className="font-bold text-slate-950 text-xs sm:text-[13px] truncate">
+                                {item.Tentruong}
+                              </h5>
+                              <RankBadge rank={item.Xephang} />
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500 mt-1">
+                              📍 <span>{item.Khuvuc || "Chưa xác định"}</span>
+                            </div>
+                            {item.Themanhdaotao && (
+                              <p className="text-xs leading-snug mt-1.5 pl-2 border-l-2 border-emerald-500 truncate text-slate-600" title={item.Themanhdaotao}>
+                                <span className="text-slate-900 font-bold">Thế mạnh: </span>
+                                <span className="font-medium">{item.Themanhdaotao}</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  /* DYNAMIC DASHBOARD VIEW or SEARCH RESULTS VIEW */
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    {searchQuery.trim() === '' ? (
+                      /* Zero Empty State: Showing Dashboard View by default */
+                      <div className="animate-fadeIn flex flex-col flex-1 p-4 space-y-6">
+                        
+                        {/* SECTION 1: Featured Regions */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-[12px] font-semibold text-[#64748B] uppercase tracking-[0.08em]">
+                              Khu vực nổi bật
+                            </h3>
+                            <button
+                              onClick={() => setActiveDashboardView('all_regions')}
+                              className="text-xs font-medium italic text-emerald-600 hover:text-emerald-700 transition-colors"
+                            >
+                              Xem tất cả &rarr;
+                            </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-2">
+                            {featuredRegions.map((region, idx) => (
+                              <div
+                                key={idx}
+                                onClick={() => {
+                                  setSelectedRegion(region.name);
+                                  setActiveInfoTab('overview');
+                                }}
+                                className="group cursor-pointer flex flex-col items-center text-center animate-stagger"
+                                style={{ animationDelay: `${idx * 50}ms` }}
+                              >
+                                <div className="relative w-[92%] mx-auto aspect-square rounded-[20px] overflow-hidden shadow-sm border border-slate-100">
+                                  <img 
+                                    src={region.image} 
+                                    alt={region.name} 
+                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                    onError={(e) => {
+                                      e.target.src = "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80";
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                                  <span className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[11px] sm:text-xs tracking-tight">
+                                    {region.name}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* SECTION 2: Featured Schools */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-[12px] font-semibold text-[#64748B] uppercase tracking-[0.08em]">
+                              Trường học nổi bật
+                            </h3>
+                            <button
+                              onClick={() => setActiveDashboardView('all_schools')}
+                              className="text-xs font-medium italic text-emerald-600 hover:text-emerald-700 transition-colors"
+                            >
+                              Xem tất cả &rarr;
+                            </button>
+                          </div>
+
+                          <div className="space-y-2">
+                            {featuredSchools.map((school, idx) => (
+                              <div
+                                key={idx}
+                                onClick={() => handleOpenEdit(school)}
+                                className="bg-white hover:bg-slate-50/80 border border-slate-50 rounded-[20px] p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center gap-3.5 animate-stagger"
+                                style={{ animationDelay: `${idx * 40}ms` }}
+                              >
+                                {/* Graduation cap icon in blue (#2563EB) and stroke 1.5 */}
+                                <div className="w-8 h-8 rounded-xl bg-blue-50/70 border border-blue-100/50 flex items-center justify-center flex-shrink-0">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 flex-shrink-0">
+                                    <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+                                    <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+                                  </svg>
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <h4 className="font-bold text-slate-950 text-xs sm:text-[13px] truncate">
+                                      {school.Tentruong}
+                                    </h4>
+                                    <RankBadge rank={school.Xephang} />
+                                  </div>
+                                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500 mt-1">
+                                    📍 <span>{school.Khuvuc || "Chưa xác định"}</span>
+                                  </div>
+                                  {school.Themanhdaotao && (
+                                    <p className="text-xs leading-snug mt-1.5 pl-2 border-l-2 border-emerald-500 truncate text-slate-600" title={school.Themanhdaotao}>
+                                      <span className="text-slate-900 font-bold">Thế mạnh: </span>
+                                      <span className="font-medium">{school.Themanhdaotao}</span>
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                      </div>
+                    ) : (
+                      /* SEARCH RESULTS VIEW WITH SYNCED DATA */
+                      <div className="flex-1 p-3.5 space-y-2 animate-fadeIn overflow-y-auto custom-scrollbar bg-slate-50/50">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 mb-1">
+                          Kết quả gợi ý tuyển sinh ({filteredItems.length})
+                        </div>
+                        {filteredItems.length > 0 ? (
+                          filteredItems.map((item, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => handleOpenEdit(item)}
+                              style={{ animationDelay: `${idx * 40}ms` }}
+                              className="animate-stagger py-2.5 px-3.5 bg-white hover:bg-slate-50/80 rounded-[16px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border-none hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col gap-1.5"
+                            >
+                              <div className="flex items-center justify-between flex-wrap gap-1">
+                                {item.Loaihinh && (
+                                  <span className="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 uppercase">
+                                    {item.Loaihinh}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <h4 className="font-bold text-slate-950 text-xs sm:text-sm truncate">
+                                  {highlightText(item.Tentruong, searchQuery)}
+                                </h4>
+                                <RankBadge rank={item.Xephang} />
+                              </div>
+                              <div className="flex flex-col gap-1.5 mt-0.5">
+                                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-slate-500">
+                                  📍 <span className="truncate">{highlightText(item.Khuvuc || "Chưa xác định", searchQuery)}</span>
+                                </div>
+                                {renderSearchSnippet(item)}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-center text-slate-400 text-xs sm:text-sm flex flex-col items-center justify-center gap-2 bg-white rounded-xl border border-slate-100">
+                            <AlertCircle size={18} className="text-slate-300" />
+                            <span>Không tìm thấy thông tin phù hợp</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+            </aside>
+
+          </div>
+
+          {/* MODAL: ADD / EDIT DIALOG */}
+          {modalOpen && (
+            <div 
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setModalOpen(false);
+              }}
+              className="fixed inset-0 bg-slate-950/30 backdrop-blur-md flex items-center justify-center p-4 z-[9999] animate-fadeIn"
+            >
+              <div 
+                onClick={(e) => e.stopPropagation()} 
+                className="bg-white rounded-[24px] max-w-[696px] w-full shadow-[0_24px_50px_rgba(15,23,42,0.12)] overflow-hidden border border-slate-200/60 transform transition-all duration-300 scale-100 p-6 sm:p-8 flex flex-col gap-4 relative"
+              >
+                
+                {isNotesExpanded ? (
+                  <div className="absolute inset-0 bg-white z-[60] flex flex-col animate-fadeIn">
+                    <div className="relative flex-1 flex flex-col p-6">
+                      <textarea
+                        name="Ghichu"
+                        value={formData.Ghichu}
+                        onChange={handleInputChange}
+                        placeholder="Nhập ghi chú thêm về trường, học bổng hoặc lưu ý tuyển sinh..."
+                        className="w-full flex-1 p-4 pr-12 bg-slate-50/50 border border-slate-200/60 rounded-2xl text-xs sm:text-sm text-slate-800 placeholder-slate-400/80 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all resize-none font-medium custom-scrollbar"
+                      ></textarea>
+                      <button
+                        type="button"
+                        onClick={() => setIsNotesExpanded(false)}
+                        className="absolute top-8 right-8 p-2 text-slate-400 hover:text-emerald-600 hover:bg-slate-100 rounded-xl transition-all flex items-center justify-center border border-slate-200 bg-white shadow-sm z-10"
+                        title="Thu nhỏ"
+                      >
+                        <ShrinkIcon size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="text-center flex flex-col gap-1 mb-4 mt-1">
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+                    {editingItem ? 'Cập nhật thông tin trường' : 'Thêm trường mới'}
+                  </h2>
+                  <p className="text-xs text-slate-400 font-normal leading-normal mt-1">
+                    Vui lòng điền thông tin chi tiết của trường Đại học/Cao đẳng bên dưới.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4 text-left flex flex-col flex-1 text-xs sm:text-sm">
+                  {dbConflictItem && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5 animate-fadeIn">
+                      <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={14} />
+                      <div className="flex-1">
+                        <h4 className="text-xs font-bold text-amber-950">Dữ liệu trên Google Sheets vừa thay đổi!</h4>
+                        <p className="text-[11px] text-amber-800 leading-normal mt-0.5">
+                          Dòng này vừa được thay đổi trực tiếp trên database bởi người khác. Nhấp để đồng bộ đè lên form hiện tại.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleResolveConflict}
+                        className="self-center px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors whitespace-nowrap"
+                      >
+                        Đồng bộ ngay
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="space-y-4 flex-1 overflow-y-auto max-h-[460px] pr-0.5 custom-scrollbar">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-slate-500">
+                        Tên trường <span className="text-rose-500/80 ml-0.5">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="Tentruong"
+                        required
+                        value={formData.Tentruong}
+                        onChange={handleInputChange}
+                        placeholder="Ví dụ: Đại học Quốc gia Seoul (SNU)"
+                        className="w-full px-3.5 h-10 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400/80 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all font-medium focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3.5">
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-slate-500">
+                          Khu vực
+                        </label>
+                        <div className="relative">
+                          <select
+                            name="Khuvuc"
+                            value={formData.Khuvuc}
+                            onChange={handleInputChange}
+                            className="w-full px-3.5 h-10 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 appearance-none font-medium cursor-pointer focus:bg-white"
+                          >
+                            <option value="">---</option>
+                            {regionsList.map((region, idx) => (
+                              <option key={idx} value={region}>{region}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400/80" size={14} />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-slate-500">
+                          Loại hình trường
+                        </label>
+                        <div className="relative">
+                          <select
+                            name="Loaihinh"
+                            value={formData.Loaihinh}
+                            onChange={handleInputChange}
+                            className="w-full px-3.5 h-10 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 appearance-none font-medium cursor-pointer focus:bg-white"
+                          >
+                            {schoolTypesList.map((type, idx) => (
+                              <option key={idx} value={type}>{type}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400/80" size={14} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3.5">
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-slate-500">
+                          Xếp hạng
+                        </label>
+                        <div className="relative">
+                          <select
+                            name="Xephang"
+                            value={formData.Xephang}
+                            onChange={handleInputChange}
+                            className="w-full px-3.5 h-10 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 appearance-none font-medium cursor-pointer focus:bg-white"
+                          >
+                            {rankingList.map((rank, idx) => (
+                              <option key={idx} value={rank}>{rank}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400/80" size={14} />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-slate-500">
+                          Học phí
+                        </label>
+                        <input
+                          type="text"
+                          name="Hocphi"
+                          value={formData.Hocphi}
+                          onChange={handleInputChange}
+                          placeholder="Ví dụ: 3,000,000 KRW/kỳ"
+                          className="w-full px-3.5 h-10 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400/80 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all font-medium focus:bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-slate-500">
+                        Thế mạnh đào tạo
+                      </label>
+                      <input
+                        type="text"
+                        name="Themanhdaotao"
+                        value={formData.Themanhdaotao}
+                        onChange={handleInputChange}
+                        placeholder="Ví dụ: Kinh doanh, Kỹ thuật công nghệ, Nghệ thuật..."
+                        className="w-full px-3.5 h-10 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400/80 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all font-medium focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-slate-500">
+                        Ghi chú
+                      </label>
+                      
+                      <div className="relative">
+                        <textarea
+                          name="Ghichu"
+                          value={formData.Ghichu}
+                          onChange={handleInputChange}
+                          placeholder="Nhập ghi chú thêm về trường, học bổng hoặc lưu ý tuyển sinh..."
+                          rows="10"
+                          className="w-full pl-3.5 pr-11 py-2 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400/80 focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all resize-none font-medium custom-scrollbar focus:bg-white"
+                        ></textarea>
+                        
+                        <button
+                          type="button"
+                          onClick={() => setIsNotesExpanded(true)}
+                          className="absolute top-2.5 right-2.5 p-1.5 text-slate-400/40 hover:text-emerald-600 rounded-lg transition-all flex items-center justify-center border border-transparent hover:border-slate-200 bg-transparent hover:bg-white shadow-none z-10 hover:opacity-100"
+                          title="Phóng to ghi chú"
+                        >
+                          <ExpandIcon size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 w-full">
+                    <button
+                      type="button"
+                      onClick={() => setModalOpen(false)}
+                      className="px-5 py-2.5 bg-transparent border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-xl text-xs sm:text-sm font-semibold transition-all active:scale-98 text-center"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all text-center"
+                    >
+                      Lưu
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL: AI CONSULTANT VIEW */}
+          {aiModalOpen && (
+            <div 
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setAiModalOpen(false);
+              }}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fadeIn"
+            >
+              <div 
+                onClick={(e) => e.stopPropagation()} 
+                className="bg-white rounded-[24px] max-w-[940px] w-full shadow-2xl overflow-hidden border border-slate-100 transform transition-transform duration-300 scale-100 pt-4 pb-4 px-5 sm:pt-5 sm:pb-5 sm:px-6 flex flex-col gap-2.5 text-xs sm:text-sm"
+              >
+                
+                <div className="text-center flex flex-col gap-1.5">
+                  <div className="flex items-center justify-center gap-2 text-amber-500">
+                    <Zap className="h-5.5 w-5.5 fill-amber-400 animate-pulse" />
+                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900">
+                      Phân tích & Tư vấn của Trợ lý A.I
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-400 font-medium">
+                    Hỗ trợ phân tích hướng nghiệp 7 bước du học Hàn Quốc chuyên sâu.
+                  </p>
+                </div>
+
+                {/* Gemini & Google Sheets API Configuration Panel */}
+                <div className="bg-amber-50/70 border border-amber-100 rounded-xl p-3 flex flex-col gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] sm:text-xs font-extrabold text-amber-800 uppercase tracking-wider">
+                      Khóa học thuật (Gemini API Key)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="password"
+                        placeholder="Dán Gemini API Key của bạn..."
+                        value={geminiApiKey}
+                        onChange={(e) => setGeminiApiKey(e.target.value)}
+                        className="flex-1 px-3 py-1 bg-white border border-amber-200 rounded-lg text-xs sm:text-sm focus:outline-none font-medium text-slate-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveApiKey(geminiApiKey)}
+                        className="px-4 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-bold transition-all active:scale-95"
+                      >
+                        Lưu Key
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 border-t border-amber-200/50 pt-2.5">
+                    <label className="text-[10px] sm:text-xs font-extrabold text-amber-800 uppercase tracking-wider">
+                      Đường dẫn Database (Google Sheets Apps Script URL)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Dán URL Google Apps Script Web App..."
+                        value={apiUrl}
+                        onChange={(e) => {
+                          setApiUrl(e.target.value);
+                          localStorage.setItem('gs_api_url', e.target.value);
+                        }}
+                        className="flex-1 px-3 py-1 bg-white border border-amber-200 rounded-lg text-xs sm:text-sm focus:outline-none font-medium text-slate-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          fetchData(apiUrl, false);
+                          showAlert('Đã cập nhật kết nối Database!', 'success');
+                        }}
+                        className="px-4 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-bold transition-all active:scale-95"
+                      >
+                        Kết nối
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="max-h-[300px] overflow-y-auto text-left pr-1 custom-scrollbar border border-slate-100 rounded-2xl bg-[#fafafc] p-4 text-xs sm:text-sm">
+                  {aiLoading ? (
+                    <div className="space-y-4 py-4">
+                      <div className="flex items-center gap-3 text-amber-600 font-bold text-xs sm:text-sm animate-pulse justify-center">
+                        <Sparkles className="animate-spin text-amber-500" size={18} />
+                        <span>Hệ thống A.I đang thu thập dữ liệu tuyển sinh...</span>
+                      </div>
+                      <div className="space-y-2.5">
+                        <div className="h-3.5 bg-slate-100 rounded-full w-full animate-pulse"></div>
+                        <div className="h-3.5 bg-slate-100 rounded-full w-5/6 animate-pulse"></div>
+                        <div className="h-3.5 bg-slate-100 rounded-full w-4/5 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="prose prose-sm text-slate-700 leading-relaxed font-medium text-xs sm:text-sm whitespace-pre-wrap">
+                      {aiResponse}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-4 w-full pt-1 justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setAiModalOpen(false)}
+                    className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 text-center"
+                  >
+                    Đóng
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAiModalOpen(false)}
+                    className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 text-center shadow-lg shadow-emerald-500/10"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TOAST NOTIFICATION CONTAINER */}
+          {alert && (
+            <div className="fixed bottom-5 right-5 z-[9999] flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border animate-slideIn text-xs sm:text-sm" style={{
+              backgroundColor: alert.type === 'success' ? '#ECFDF5' : '#FEF2F2',
+              borderColor: alert.type === 'success' ? '#A7F3D0' : '#FCA5A5',
+              color: alert.type === 'success' ? '#065F46' : '#991B1B'
+            }}>
+              {alert.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
+              <span className="font-bold">{alert.message}</span>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
